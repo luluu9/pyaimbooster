@@ -1,6 +1,7 @@
 import pygame
 import pygame.freetype
 import random
+import time
 from pygame.constants import USEREVENT
 
 
@@ -33,6 +34,8 @@ class ScoreCounter():
         self.font_size = 30
         self.font = pygame.freetype.SysFont("CourierNew", self.font_size)
         self.color = (255, 255, 255)
+        self.shoots = 0
+        self.start_time = time.time()
     
     def update(self):
         text = f"{self.hits}/{self.all_targets}"
@@ -46,6 +49,13 @@ class ScoreCounter():
     def add_target(self):
         self.all_targets += 1
 
+    def add_shoot(self):
+        self.shoots += 1
+    
+    # return how much time current round takes
+    def get_time(self):
+        return time.time() - self.start_time
+    
 
 class Target():
     def __init__(self):
@@ -102,6 +112,7 @@ while running:
         if event.type == pygame.MOUSEBUTTONDOWN:
             for target in targets:
                 target.check_collision(pygame.mouse.get_pos())
+            scoreCounter.add_shoot()
         elif event.type == QUIT:
             running = False
         elif event.type == ADD_TARGET:
@@ -126,5 +137,6 @@ pygame.quit()
 
 
 # todo
+# - add training modes
+# - create summary of training based on stats
 # - forbid to spawn new target onto other target
-# - count hits
