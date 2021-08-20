@@ -16,7 +16,7 @@ SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 FPS = 60
 
-TARGET_SPAWNRATE = 2 # targets per second 
+TARGET_SPAWNRATE = 3 # targets per second 
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
@@ -26,6 +26,11 @@ pygame.time.set_timer(ADD_TARGET, int(1000/TARGET_SPAWNRATE))
 
 scoreCounter = None
 
+# APPEARANCE 
+background_color = (222, 222, 222)
+outline_color = (0, 0, 0) 
+filling_color = (255, 255, 255)
+score_color = (74, 74, 74)
 
 class ScoreCounter():
     def __init__(self):
@@ -33,7 +38,6 @@ class ScoreCounter():
         self.all_targets = 0
         self.font_size = 30
         self.font = pygame.freetype.SysFont("CourierNew", self.font_size)
-        self.color = (255, 255, 255)
         self.shoots = 0
         self.start_time = time.time()
     
@@ -41,7 +45,7 @@ class ScoreCounter():
         text = f"{self.hits}/{self.all_targets}"
         text_rect = self.font.get_rect(text, size=30) 
         text_rect.midtop = screen.get_rect().midtop
-        self.font.render_to(screen, text_rect, text, self.color)
+        self.font.render_to(screen, text_rect, text, score_color)
 
     def add_hit(self):
         self.hits += 1
@@ -59,12 +63,11 @@ class ScoreCounter():
 
 class Target():
     def __init__(self):
-        self.color = get_random_color()
         self.max_radius = 50
         self.reached_max = False
         self.pos = get_random_pos(self.max_radius)
         self.radius = 0
-        self.rect = None
+        self.outline_margin = 4
 
     def update(self):
         if self.radius < self.max_radius and not self.reached_max:
@@ -75,7 +78,10 @@ class Target():
             # destroy this object if smaller than 1px
             if self.radius <= 0:
                 self.destroy()
-        self.rect = pygame.draw.circle(screen, self.color, self.pos, self.radius)
+        # draw outline
+        pygame.draw.circle(screen, outline_color, self.pos, self.radius, self.outline_margin)
+        # draw filling
+        pygame.draw.circle(screen, filling_color, self.pos, self.radius-self.outline_margin)
 
     def check_collision(self, mouse_pos):
         if pow((mouse_pos[0] - self.pos[0]), 2) + pow((mouse_pos[1] - self.pos[1]), 2) <= pow(self.radius, 2):
@@ -107,7 +113,7 @@ targets_to_delete = []
 
 running = True
 while running:
-    screen.fill((0, 0, 0))
+    screen.fill(background_color)
     for event in pygame.event.get():
         if event.type == pygame.MOUSEBUTTONDOWN:
             for target in targets:
