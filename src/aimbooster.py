@@ -13,13 +13,13 @@ SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 FPS = 60
 
-TARGET_SPAWNRATE = 3 # targets per second 
+TARGET_SPAWNRATE = 2 # targets per second 
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
 
 ADD_TARGET = USEREVENT + 1
-pygame.time.set_timer(ADD_TARGET, 1000//TARGET_SPAWNRATE)
+pygame.time.set_timer(ADD_TARGET, int(1000/TARGET_SPAWNRATE))
 
 
 class Target():
@@ -43,16 +43,17 @@ class Target():
         self.rect = pygame.draw.circle(screen, self.color, self.pos, self.radius)
 
     def check_collision(self, mouse_pos):
-        if self.rect: # if instanced in same frame as click a rect is None
-            if self.rect.collidepoint(mouse_pos):
-                self.destroy()
-    
+        if pow((mouse_pos[0] - self.pos[0]), 2) + pow((mouse_pos[1] - self.pos[1]), 2) <= pow(self.radius, 2):
+            self.destroy()
+
     def destroy(self):
         targets_to_delete.append(self)
 
 
 def get_random_pos(margin=0):
-    return [random.randint(margin, SCREEN_WIDTH-margin), random.randint(margin, SCREEN_HEIGHT-margin)]
+    x = random.randint(margin, SCREEN_WIDTH-margin)
+    y = random.randint(margin, SCREEN_HEIGHT-margin)
+    return (x, y)
 
 
 def get_random_color():
