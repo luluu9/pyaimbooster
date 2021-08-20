@@ -13,11 +13,13 @@ SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 FPS = 60
 
+TARGET_SPAWNRATE = 3 # targets per second 
+
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
 
 ADD_TARGET = USEREVENT + 1
-pygame.time.set_timer(ADD_TARGET, 500)
+pygame.time.set_timer(ADD_TARGET, 1000//TARGET_SPAWNRATE)
 
 
 class Target():
