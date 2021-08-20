@@ -27,7 +27,7 @@ class Target():
         self.color = get_random_color()
         self.max_radius = 50
         self.reached_max = False
-        self.pos = get_random_pos()
+        self.pos = get_random_pos(self.max_radius)
         self.radius = 0
         self.rect = None
 
@@ -51,8 +51,8 @@ class Target():
         targets_to_delete.append(self)
 
 
-def get_random_pos():
-    return [random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT)]
+def get_random_pos(margin=0):
+    return [random.randint(margin, SCREEN_WIDTH-margin), random.randint(margin, SCREEN_HEIGHT-margin)]
 
 
 def get_random_color():
@@ -93,6 +93,5 @@ pygame.quit()
 
 
 # todo
-# - set spawnrate
-# - limit target spawn border
+# - forbid to spawn new target onto other target
 # - count hits
