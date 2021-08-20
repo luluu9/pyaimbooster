@@ -1,6 +1,8 @@
 import pygame
+import pygame.freetype
 import random
 from pygame.constants import USEREVENT
+
 
 from pygame.locals import (
     QUIT,
@@ -20,6 +22,29 @@ clock = pygame.time.Clock()
 
 ADD_TARGET = USEREVENT + 1
 pygame.time.set_timer(ADD_TARGET, int(1000/TARGET_SPAWNRATE))
+
+scoreCounter = None
+
+
+class ScoreCounter():
+    def __init__(self):
+        self.hits = 0
+        self.all_targets = 0
+        self.font_size = 30
+        self.font = pygame.freetype.SysFont("CourierNew", self.font_size)
+        self.color = (255, 255, 255)
+    
+    def update(self):
+        text = f"{self.hits}/{self.all_targets}"
+        text_rect = self.font.get_rect(text, size=30) 
+        text_rect.midtop = screen.get_rect().midtop
+        self.font.render_to(screen, text_rect, text, self.color)
+
+    def add_hit(self):
+        self.hits += 1
+    
+    def add_target(self):
+        self.all_targets += 1
 
 
 class Target():
@@ -44,10 +69,12 @@ class Target():
 
     def check_collision(self, mouse_pos):
         if pow((mouse_pos[0] - self.pos[0]), 2) + pow((mouse_pos[1] - self.pos[1]), 2) <= pow(self.radius, 2):
+            scoreCounter.add_hit()
             self.destroy()
 
     def destroy(self):
         targets_to_delete.append(self)
+        scoreCounter.add_target()
 
 
 def get_random_pos(margin=0):
@@ -63,6 +90,8 @@ def get_random_color():
     return (r, g, b)
 
 
+scoreCounter = ScoreCounter()
+
 targets = [Target()]
 targets_to_delete = []
 
@@ -77,7 +106,7 @@ while running:
             running = False
         elif event.type == ADD_TARGET:
             targets.append(Target())
-
+            
     # update targets size
     for target in targets:
         target.update()
@@ -85,6 +114,9 @@ while running:
     # delete unused targets
     while len(targets_to_delete) > 0:
         targets.remove(targets_to_delete.pop())
+    
+    # update counter
+    scoreCounter.update()
 
     # refresh display
     pygame.display.update()
