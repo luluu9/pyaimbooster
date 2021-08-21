@@ -75,23 +75,71 @@ class Target():
         return (x, y)
 
 
+# Button with background
+class ButtonWB(): 
+    def __init__(self, font, text, text_color, text_rect, background_rect=None, background_color=(0,0,0), border_radius=0):
+        if background_rect:
+             self.background_rect = pygame.draw.rect(screen, background_color, background_rect, border_radius)
+        self.text_rect = font.render_to(screen, text_rect, text, text_color)
+
+    def set_callback(self, callback, *args, **kwargs):
+        self.callback = callback
+        self.callback_args = args
+        self.callback_kwargs = kwargs
+
+    def check_click(self, mouse_pos):
+        if self.background_rect:
+            if self.background_rect.collidepoint(mouse_pos):
+                self.callback(*self.callback_args, **self.callback_kwargs)
+        else:
+            if self.text_rect.collidepoint(mouse_pos):
+                self.callback(*self.callback_args, **self.callback_kwargs)
+
+
 class Game():
     def __init__(self):
-        self.change_game_mode("lobby")
+        self.change_game_mode("Lobby")
 
     def change_game_mode(self, game_mode):
-        if game_mode == "lobby":
-            self.load_lobby()
-        elif game_mode == "arcade":
-            self.load_arcade()
+        if game_mode == "Lobby":
+            self._load_lobby()
+        elif game_mode == "Arcade":
+            self._load_arcade()
         else:
             raise Exception("There is no provided game mode: " + str(game_mode))
         self.game_mode = game_mode
     
-    def load_lobby(self):
-        pass
+    def _load_lobby(self):
+        screen.fill(lobby_color)
+        gamemodes = ["Arcade", "XXX", "XXX"]
+        self.lobby_buttons = []
+        # prepare variables for text
+        font = pygame.freetype.SysFont("CourierNew", lobby_fontsize)
+        gap = lobby_fontsize * 1.3
+        center = screen.get_rect().center
+        start = (center[0], center[1] - (len(gamemodes) * gap)/2)
+        # find biggest rect to function as background rect
+        biggest_rect = font.get_rect(max(gamemodes, key=len), size=lobby_fontsize)
+        for i, gamemode in enumerate(gamemodes):
+            # fit text rect
+            text_rect = font.get_rect(gamemode, size=lobby_fontsize) 
+            text_rect.center = (start[0], start[1] + gap * i)
+        
+            # prepare background for text
+            background_rect = pygame.Rect(start[0] - biggest_rect.w/2, text_rect.y, biggest_rect.w, biggest_rect.h)
+            background_rect = background_rect.inflate(15, 15) # make some space around
+            
+            # create and render button  
+            button = ButtonWB(font, gamemode, score_color, text_rect, background_rect, background_color, 5)
+           
+            # set callbacks to change game mode
+            if gamemode == "Arcade":
+                button.set_callback(self.change_game_mode, "Arcade")
+            else: 
+                button.set_callback(self.change_game_mode, "Lobby") # placeholder
+            self.lobby_buttons.append(button)
 
-    def load_arcade(self):
+    def _load_arcade(self):
         global scoreCounter, targets, targets_to_delete
         scoreCounter = ScoreCounter()
         targets = [Target()]
@@ -99,15 +147,18 @@ class Game():
         pygame.time.set_timer(ADD_TARGET, int(1000/TARGET_SPAWNRATE))
     
     def frame(self):
-        if self.game_mode == "lobby":
-            self.lobby_frame()
-        elif self.game_mode == "arcade":
-            self.arcade_frame()
+        if self.game_mode == "Lobby":
+            self._lobby_frame()
+        elif self.game_mode == "Arcade":
+            self._arcade_frame()
     
-    def lobby_frame(self):
-        pass
+    def _lobby_frame(self):
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                for button in self.lobby_buttons:
+                    button.check_click(pygame.mouse.get_pos())
 
-    def arcade_frame(self):
+    def _arcade_frame(self):
         screen.fill(background_color)
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -147,6 +198,8 @@ background_color = (222, 222, 222)
 outline_color = (0, 0, 0) 
 filling_color = (255, 255, 255)
 score_color = (74, 74, 74)
+lobby_color = (255, 255, 255)
+lobby_fontsize = 40
 
 # GAME MECHANICS
 scoreCounter = None
@@ -159,7 +212,8 @@ ADD_TARGET = USEREVENT + 1
 
 # LOAD GAME
 game = Game()
-game.change_game_mode("arcade")
+# game.change_game_mode("arcade")
+
 
 # MAINLOOP
 running = True
