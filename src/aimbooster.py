@@ -54,20 +54,15 @@ class Target():
             self.radius -= 1
             # destroy this object if smaller than 1px
             if self.radius <= 0:
-                self.destroy()
+                return False 
         # draw outline
         pygame.draw.circle(screen, outline_color, self.pos, self.radius, self.outline_margin)
         # draw filling
         pygame.draw.circle(screen, filling_color, self.pos, self.radius-self.outline_margin)
 
-    def check_collision(self, mouse_pos):
+    def mouse_collides(self, mouse_pos):
         if pow((mouse_pos[0] - self.pos[0]), 2) + pow((mouse_pos[1] - self.pos[1]), 2) <= pow(self.radius, 2):
-            scoreCounter.add_hit()
-            self.destroy()
-
-    def destroy(self):
-        targets_to_delete.append(self)
-        scoreCounter.add_target()
+            return True
     
     def get_random_pos(self, margin=0):
         x = random.randint(margin, SCREEN_WIDTH-margin)
@@ -140,10 +135,9 @@ class Game():
             self.lobby_buttons.append(button)
 
     def _load_arcade(self):
-        global scoreCounter, targets, targets_to_delete
-        scoreCounter = ScoreCounter()
-        targets = [Target()]
-        targets_to_delete = []
+        self.scoreCounter = ScoreCounter()
+        self.targets = [Target()]
+        self.targets_to_delete = []
         pygame.time.set_timer(ADD_TARGET, int(1000/TARGET_SPAWNRATE))
     
     def frame(self):
@@ -162,24 +156,30 @@ class Game():
         screen.fill(background_color)
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
-                for target in targets:
-                    target.check_collision(pygame.mouse.get_pos())
-                scoreCounter.add_shoot()
+                for target in self.targets:
+                    if target.mouse_collides(pygame.mouse.get_pos()):
+                        self.scoreCounter.add_hit()
+                        self.scoreCounter.add_target()
+                        self.targets_to_delete.append(target)
+                self.scoreCounter.add_shoot()
             elif event.type == ADD_TARGET:
-                targets.append(Target())
+                self.targets.append(Target())
                 
         # update targets size
-        for target in targets:
-            target.update()
+        for target in self.targets:
+            if target.update() == False:
+                self.targets_to_delete.append(target)
+                self.scoreCounter.add_target()
+
         
         # delete unused targets
-        while len(targets_to_delete) > 0:
+        while len(self.targets_to_delete) > 0:
             try:
-                targets.remove(targets_to_delete.pop())
+                self.targets.remove(self.targets_to_delete.pop())
             except ValueError: # probably double clicked faster than delta time
                 pass 
         # update counter
-        scoreCounter.update()
+        self.scoreCounter.update()
 
 
 # BASE SETTINGS
@@ -189,7 +189,7 @@ FPS = 60
 
 # PYGAME INIT
 pygame.init()
-pygame.display.set_caption('aimbooster v.0.0.1')
+pygame.display.set_caption('aimbooster v.0.0.2')
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
 
@@ -202,9 +202,6 @@ lobby_color = (255, 255, 255)
 lobby_fontsize = 40
 
 # GAME MECHANICS
-scoreCounter = None
-targets = []
-targets_to_delete = []
 TARGET_SPAWNRATE = 3 # targets per second 
 
 # GAME EVENTS
@@ -212,8 +209,6 @@ ADD_TARGET = USEREVENT + 1
 
 # LOAD GAME
 game = Game()
-# game.change_game_mode("arcade")
-
 
 # MAINLOOP
 running = True
@@ -232,3 +227,4 @@ pygame.quit()
 # - add training modes
 # - create summary of training based on stats
 # - forbid to spawn new target onto other target
+# - save stats
