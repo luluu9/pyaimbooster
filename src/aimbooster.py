@@ -15,7 +15,7 @@ class ScoreCounter():
         self.hits = 0
         self.all_targets = 0
         self.font_size = 30
-        self.font = pygame.freetype.SysFont("CourierNew", self.font_size)
+        self.font = pygame.freetype.Font(default_font, self.font_size)
         self.shoots = 0
         self.start_time = time.time()
     
@@ -126,7 +126,7 @@ class Game():
         gamemodes = ["Arcade", "XXX", "XXX"]
         self.lobby_buttons = []
         # prepare variables for text
-        font = pygame.freetype.SysFont("CourierNew", lobby_fontsize)
+        font = pygame.freetype.Font("src/fonts/no_continue.ttf", lobby_fontsize)
         gap = lobby_fontsize * 1.3
         center = screen.get_rect().center
         start = (center[0], center[1] - (len(gamemodes) * gap)/2)
@@ -159,7 +159,7 @@ class Game():
             font.render_to(screen, text_rect, var_text, summary_color)
         # prepare
         screen.fill(lobby_color)
-        font = pygame.freetype.SysFont("BerlinSansFB", summary_fontsize)
+        font = pygame.freetype.Font(default_font, summary_fontsize)
         gap = summary_fontsize * 1.5
         start = pygame.Rect(200, 150, 1, 1)
         hits_ratio = f"{self.scoreCounter.get_hits()}/{self.scoreCounter.get_all_targets()}" 
@@ -200,7 +200,6 @@ class Game():
             self._summary_frame()
         elif self.game_mode == "Arcade":
             self._arcade_frame()
-        
     
     def _lobby_frame(self):
         for event in pygame.event.get():
@@ -262,6 +261,7 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
 
 # APPEARANCE 
+default_font = "src/fonts/no_continue.ttf"
 background_color = (222, 222, 222)
 outline_color = (0, 0, 0) 
 filling_color = (255, 255, 255)
