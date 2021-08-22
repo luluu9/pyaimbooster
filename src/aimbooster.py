@@ -157,31 +157,32 @@ class Game():
             text_rect = font.get_rect(var_text, size=summary_fontsize) 
             text_rect.topleft = pos.topleft
             font.render_to(screen, text_rect, var_text, summary_color)
+        
         # prepare
         screen.fill(lobby_color)
         font = pygame.freetype.Font(default_font, summary_fontsize)
         gap = summary_fontsize * 1.5
-        start = pygame.Rect(200, 150, 1, 1)
         hits_ratio = f"{self.scoreCounter.get_hits()}/{self.scoreCounter.get_all_targets()}" 
-
-        # show stats
-        show_variable("Hits", hits_ratio, start.move(0, gap))
-        show_variable("Accuracy", f"{self.scoreCounter.get_accuracy()}%", start)
-        show_variable("Time", f"{self.scoreCounter.get_time()}s", start.move(0, gap*2))
 
         # create buttons
         midbottom = screen.get_rect().midbottom 
         button_padding = 15
-        text_rect = font.get_rect("Play again", size=summary_fontsize) 
-        text_rect.midright = midbottom
-        text_rect.move_ip(-button_padding, -summary_fontsize) # to give some space between buttons
-        play_button = ButtonWB(font, "Play again", summary_color, text_rect, text_rect.inflate(button_padding, button_padding), background_color, 5)
+        play_rect = font.get_rect("Play again", size=summary_fontsize) 
+        play_rect.midright = midbottom
+        play_rect.move_ip(-button_padding, -summary_fontsize) # to give some space between buttons
+        play_button = ButtonWB(font, "Play again", summary_color, play_rect, play_rect.inflate(button_padding, button_padding), background_color, 5)
         
         return_rect = font.get_rect("Return", size=summary_fontsize) 
         return_rect.midleft = midbottom
         return_rect.move_ip(button_padding, -summary_fontsize)
         return_button = ButtonWB(font, "Return", summary_color, return_rect, return_rect.inflate(button_padding, button_padding), background_color, 5)
-        
+
+        # show stats
+        start = pygame.Rect(play_rect.x, 150, 1, 1)
+        show_variable("Hits", hits_ratio, start.move(0, gap))
+        show_variable("Accuracy", f"{self.scoreCounter.get_accuracy()}%", start)
+        show_variable("Time", f"{self.scoreCounter.get_time()}s", start.move(0, gap*2))
+
         # set up callbacks
         play_button.set_callback(self.change_game_mode, previous_game_mode)
         return_button.set_callback(self.change_game_mode, "Lobby")
@@ -229,7 +230,6 @@ class Game():
                 if event.key == K_s:
                     # return to prevent updating screen with targets after summary shows up
                     return self.change_game_mode("Summary")
-
                 
         # update targets size
         for target in self.targets:
@@ -237,13 +237,13 @@ class Game():
                 self.targets_to_delete.append(target)
                 self.scoreCounter.add_target()
 
-        
         # delete unused targets
         while len(self.targets_to_delete) > 0:
             try:
                 self.targets.remove(self.targets_to_delete.pop())
             except ValueError: # probably double clicked faster than delta time
                 pass 
+        
         # update counter
         self.scoreCounter.update()
 
