@@ -6,7 +6,9 @@ from pygame.constants import USEREVENT
 
 from pygame.locals import (
     QUIT,
-    K_s
+    KEYDOWN,
+    K_s,
+    K_r
 )
 
 
@@ -157,7 +159,7 @@ class Game():
             text_rect = font.get_rect(var_text, size=summary_fontsize) 
             text_rect.topleft = pos.topleft
             font.render_to(screen, text_rect, var_text, summary_color)
-        
+
         # prepare
         screen.fill(lobby_color)
         font = pygame.freetype.Font(default_font, summary_fontsize)
@@ -226,10 +228,6 @@ class Game():
                 self.scoreCounter.add_shoot()
             elif event.type == ADD_TARGET:
                 self.targets.append(Target())
-            elif event.type == pygame.KEYDOWN:
-                if event.key == K_s:
-                    # return to prevent updating screen with targets after summary shows up
-                    return self.change_game_mode("Summary")
                 
         # update targets size
         for target in self.targets:
@@ -283,9 +281,17 @@ game = Game()
 # MAINLOOP
 running = True
 while running:
-    for event in pygame.event.get(QUIT):
+    for event in pygame.event.get((QUIT, KEYDOWN)):
         if event.type == QUIT:
             running = False
+        elif event.type == KEYDOWN:
+            if event.key == K_s:
+                # return to prevent updating screen with targets after summary shows up
+                game.change_game_mode("Summary")
+                continue
+            elif event.key == K_r:
+                game.change_game_mode(game.game_mode)
+                continue
     game.frame()
     # refresh display
     pygame.display.update()
@@ -295,7 +301,6 @@ pygame.quit()
 
 # todo
 # - add training modes
-# - create summary of training based on stats
 # - forbid to spawn new target onto other target
 # - save stats
 # - reset with keybutton (r?)
