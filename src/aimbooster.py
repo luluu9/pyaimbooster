@@ -246,7 +246,6 @@ class Game():
         self.scoreCounter.update()
 
 
-
 # BASE SETTINGS
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
@@ -305,4 +304,3 @@ pygame.quit()
 # - add training modes
 # - forbid to spawn new target onto other target
 # - save stats
-# - reset with keybutton (r?)
