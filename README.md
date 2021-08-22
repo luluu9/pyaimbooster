@@ -2,9 +2,9 @@
 Here comes a tool for improving your aim written in Python with help of Pygame library. It's in an early stage of development.
 
 # Screenshots
-[Main menu](img/main_menu.png)
-[The game](img/the_game.png)
-[Summary tab](img/summary.png)
+![Main menu](img/main_menu.png)
+![The game](img/the_game.png)
+![Summary tab](img/summary.png)
 
 # Todo
 - Add new training modes
