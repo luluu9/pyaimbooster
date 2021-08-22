@@ -6,6 +6,7 @@ from pygame.constants import USEREVENT
 
 from pygame.locals import (
     QUIT,
+    K_s
 )
 
 
@@ -35,7 +36,19 @@ class ScoreCounter():
     
     # return how much time current round takes
     def get_time(self):
-        return time.time() - self.start_time
+        return round(time.time() - self.start_time, 2)
+    
+    def get_accuracy(self):
+        if self.shoots > 0:
+            return round(self.hits*100/self.shoots, 2)
+        else:
+            return 0.0
+    
+    def get_hits(self):
+        return self.hits
+    
+    def get_all_targets(self):
+        return self.all_targets
     
 
 class Target():
@@ -96,8 +109,12 @@ class Game():
         self.change_game_mode("Lobby")
 
     def change_game_mode(self, game_mode):
+        # reset events
+        pygame.time.set_timer(ADD_TARGET, 0)
         if game_mode == "Lobby":
             self._load_lobby()
+        elif game_mode == "Summary":
+            self._load_summary(previous_game_mode=self.game_mode)
         elif game_mode == "Arcade":
             self._load_arcade()
         else:
@@ -133,23 +150,68 @@ class Game():
             else: 
                 button.set_callback(self.change_game_mode, "Lobby") # placeholder
             self.lobby_buttons.append(button)
+    
+    def _load_summary(self, previous_game_mode):
+        def show_variable(text, var, pos):
+            var_text = f"{text}: {var}"
+            text_rect = font.get_rect(var_text, size=summary_fontsize) 
+            text_rect.topleft = pos.topleft
+            font.render_to(screen, text_rect, var_text, summary_color)
+        # prepare
+        screen.fill(lobby_color)
+        font = pygame.freetype.SysFont("BerlinSansFB", summary_fontsize)
+        gap = summary_fontsize * 1.5
+        start = pygame.Rect(200, 150, 1, 1)
+        hits_ratio = f"{self.scoreCounter.get_hits()}/{self.scoreCounter.get_all_targets()}" 
+
+        # show stats
+        show_variable("Hits", hits_ratio, start.move(0, gap))
+        show_variable("Accuracy", f"{self.scoreCounter.get_accuracy()}%", start)
+        show_variable("Time", f"{self.scoreCounter.get_time()}s", start.move(0, gap*2))
+
+        # create buttons
+        midbottom = screen.get_rect().midbottom 
+        button_padding = 15
+        text_rect = font.get_rect("Play again", size=summary_fontsize) 
+        text_rect.midright = midbottom
+        text_rect.move_ip(-button_padding, -summary_fontsize) # to give some space between buttons
+        play_button = ButtonWB(font, "Play again", summary_color, text_rect, text_rect.inflate(button_padding, button_padding), background_color, 5)
+        
+        return_rect = font.get_rect("Return", size=summary_fontsize) 
+        return_rect.midleft = midbottom
+        return_rect.move_ip(button_padding, -summary_fontsize)
+        return_button = ButtonWB(font, "Return", summary_color, return_rect, return_rect.inflate(button_padding, button_padding), background_color, 5)
+        
+        # set up callbacks
+        play_button.set_callback(self.change_game_mode, previous_game_mode)
+        return_button.set_callback(self.change_game_mode, "Lobby")
+        self.summary_buttons = (play_button, return_button)
 
     def _load_arcade(self):
         self.scoreCounter = ScoreCounter()
         self.targets = [Target()]
         self.targets_to_delete = []
         pygame.time.set_timer(ADD_TARGET, int(1000/TARGET_SPAWNRATE))
-    
+
     def frame(self):
         if self.game_mode == "Lobby":
             self._lobby_frame()
+        elif self.game_mode == "Summary":
+            self._summary_frame()
         elif self.game_mode == "Arcade":
             self._arcade_frame()
+        
     
     def _lobby_frame(self):
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 for button in self.lobby_buttons:
+                    button.check_click(pygame.mouse.get_pos())
+
+    def _summary_frame(self):
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                for button in self.summary_buttons:
                     button.check_click(pygame.mouse.get_pos())
 
     def _arcade_frame(self):
@@ -164,6 +226,11 @@ class Game():
                 self.scoreCounter.add_shoot()
             elif event.type == ADD_TARGET:
                 self.targets.append(Target())
+            elif event.type == pygame.KEYDOWN:
+                if event.key == K_s:
+                    # return to prevent updating screen with targets after summary shows up
+                    return self.change_game_mode("Summary")
+
                 
         # update targets size
         for target in self.targets:
@@ -180,6 +247,7 @@ class Game():
                 pass 
         # update counter
         self.scoreCounter.update()
+
 
 
 # BASE SETTINGS
@@ -200,6 +268,8 @@ filling_color = (255, 255, 255)
 score_color = (74, 74, 74)
 lobby_color = (255, 255, 255)
 lobby_fontsize = 40
+summary_color = (155, 155, 155)
+summary_fontsize = 30
 
 # GAME MECHANICS
 TARGET_SPAWNRATE = 3 # targets per second 
@@ -228,3 +298,4 @@ pygame.quit()
 # - create summary of training based on stats
 # - forbid to spawn new target onto other target
 # - save stats
+# - reset with keybutton (r?)
