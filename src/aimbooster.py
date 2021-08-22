@@ -124,7 +124,7 @@ class Game():
         self.game_mode = game_mode
     
     def _load_lobby(self):
-        screen.fill(lobby_color)
+        screen.fill(lobby_bg_color)
         gamemodes = ["Arcade", "XXX", "XXX"]
         self.lobby_buttons = []
         # prepare variables for text
@@ -144,7 +144,7 @@ class Game():
             background_rect = background_rect.inflate(15, 15) # make some space around
             
             # create and render button  
-            button = ButtonWB(font, gamemode, score_color, text_rect, background_rect, background_color, 5)
+            button = ButtonWB(font, gamemode, lobby_color, text_rect, background_rect, lobby_color, 5)
            
             # set callbacks to change game mode
             if gamemode == "Arcade":
@@ -161,7 +161,7 @@ class Game():
             font.render_to(screen, text_rect, var_text, summary_color)
 
         # prepare
-        screen.fill(lobby_color)
+        screen.fill(summary_bg_color)
         font = pygame.freetype.Font(default_font, summary_fontsize)
         gap = summary_fontsize * 1.5
         hits_ratio = f"{self.scoreCounter.get_hits()}/{self.scoreCounter.get_all_targets()}" 
@@ -172,18 +172,18 @@ class Game():
         play_rect = font.get_rect("Play again", size=summary_fontsize) 
         play_rect.midright = midbottom
         play_rect.move_ip(-button_padding, -summary_fontsize) # to give some space between buttons
-        play_button = ButtonWB(font, "Play again", summary_color, play_rect, play_rect.inflate(button_padding, button_padding), background_color, 5)
+        play_button = ButtonWB(font, "Play again", summary_color, play_rect, play_rect.inflate(button_padding, button_padding), summary_color, 5)
         
         return_rect = font.get_rect("Return", size=summary_fontsize) 
         return_rect.midleft = midbottom
         return_rect.move_ip(button_padding, -summary_fontsize)
-        return_button = ButtonWB(font, "Return", summary_color, return_rect, return_rect.inflate(button_padding, button_padding), background_color, 5)
+        return_button = ButtonWB(font, "Return", summary_color, return_rect, return_rect.inflate(button_padding, button_padding), summary_color, 5)
 
         # show stats
         start = pygame.Rect(play_rect.x, 150, 1, 1)
         show_variable("Hits", hits_ratio, start.move(0, gap))
         show_variable("Accuracy", f"{self.scoreCounter.get_accuracy()}%", start)
-        show_variable("Time", f"{self.scoreCounter.get_time()}s", start.move(0, gap*2))
+        show_variable("Time", f"{self.scoreCounter.get_time()} s", start.move(0, gap*2))
 
         # set up callbacks
         play_button.set_callback(self.change_game_mode, previous_game_mode)
@@ -264,9 +264,11 @@ background_color = (222, 222, 222)
 outline_color = (0, 0, 0) 
 filling_color = (255, 255, 255)
 score_color = (74, 74, 74)
-lobby_color = (255, 255, 255)
+lobby_bg_color = background_color
+lobby_color = score_color
 lobby_fontsize = 40
-summary_color = (155, 155, 155)
+summary_bg_color = background_color
+summary_color = score_color
 summary_fontsize = 30
 
 # GAME MECHANICS
