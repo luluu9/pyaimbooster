@@ -54,13 +54,16 @@ class ScoreCounter():
     
 
 class Target():
-    def __init__(self):
+    def __init__(self, start_max=False):
         self.max_radius = 50
         self.reached_max = False
         self.pos = self.get_random_pos(self.max_radius)
         self.radius = 0
         self.outline_margin = 4
-
+        self.start_max = False
+        if start_max:
+            self.radius = self.max_radius
+    
     def update(self):
         if self.radius < self.max_radius and not self.reached_max:
             self.radius += 1
@@ -70,6 +73,9 @@ class Target():
             # destroy this object if smaller than 1px
             if self.radius <= 0:
                 return False 
+        self.draw()
+
+    def draw(self):
         # draw outline
         pygame.draw.circle(screen, outline_color, self.pos, self.radius, self.outline_margin)
         # draw filling
@@ -110,21 +116,28 @@ class Game():
         self.change_game_mode("Lobby")
 
     def change_game_mode(self, game_mode):
-        # reset events
-        pygame.time.set_timer(ADD_TARGET, 0)
+        self.reset_events()
         if game_mode == "Lobby":
             self._load_lobby()
         elif game_mode == "Summary":
             self._load_summary(previous_game_mode=self.game_mode)
         elif game_mode == "Arcade":
             self._load_arcade()
+        elif game_mode == "Speedy fingers":
+            self._load_speedy_fingers()
         else:
             raise Exception("There is no provided game mode: " + str(game_mode))
         self.game_mode = game_mode
     
+    def reset_events(self):
+        pygame.time.set_timer(ADD_TARGET, 0)
+        self.scoreCounter = ScoreCounter()
+        self.targets = []
+        self.targets_to_delete = []
+
     def _load_lobby(self):
         screen.fill(lobby_bg_color)
-        gamemodes = ["Arcade", "XXX", "XXX"]
+        gamemodes = ["Arcade", "Speedy fingers", "XXX"]
         self.lobby_buttons = []
         # prepare variables for text
         font = pygame.freetype.Font("src/fonts/no_continue.ttf", lobby_fontsize)
@@ -148,6 +161,8 @@ class Game():
             # set callbacks to change game mode
             if gamemode == "Arcade":
                 button.set_callback(self.change_game_mode, "Arcade")
+            elif gamemode == "Speedy fingers":
+                button.set_callback(self.change_game_mode, "Speedy fingers")
             else: 
                 button.set_callback(self.change_game_mode, "Lobby") # placeholder
             self.lobby_buttons.append(button)
@@ -190,10 +205,10 @@ class Game():
         self.summary_buttons = (play_button, return_button)
 
     def _load_arcade(self):
-        self.scoreCounter = ScoreCounter()
-        self.targets = [Target()]
-        self.targets_to_delete = []
         pygame.time.set_timer(ADD_TARGET, int(1000/TARGET_SPAWNRATE))
+
+    def _load_speedy_fingers(self):
+        self.targets = [Target(start_max=True) for i in range(5)]
 
     def frame(self):
         if self.game_mode == "Lobby":
@@ -202,6 +217,8 @@ class Game():
             self._summary_frame()
         elif self.game_mode == "Arcade":
             self._arcade_frame()
+        elif self.game_mode == "Speedy fingers":
+            self._speedy_fingers_frame()
     
     def _lobby_frame(self):
         for event in pygame.event.get():
@@ -228,12 +245,40 @@ class Game():
             elif event.type == ADD_TARGET:
                 self.targets.append(Target())
                 
-        # update targets size
+        # update targets size and draw
         for target in self.targets:
             if target.update() == False:
                 self.targets_to_delete.append(target)
                 self.scoreCounter.add_target()
 
+        # delete unused targets
+        while len(self.targets_to_delete) > 0:
+            try:
+                self.targets.remove(self.targets_to_delete.pop())
+            except ValueError: # probably double clicked faster than delta time
+                pass 
+        
+        # update counter
+        self.scoreCounter.update()
+
+    def _speedy_fingers_frame(self):
+        screen.fill(background_color)
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                for target in self.targets:
+                    if target.mouse_collides(pygame.mouse.get_pos()):
+                        self.scoreCounter.add_hit()
+                        self.scoreCounter.add_target()
+                        self.targets_to_delete.append(target)
+                        pygame.event.post(pygame.event.Event(ADD_TARGET))
+                self.scoreCounter.add_shoot()
+            elif event.type == ADD_TARGET:
+                self.targets.append(Target(start_max=True))
+
+        # draw targets
+        for target in self.targets:
+            target.draw()
+        
         # delete unused targets
         while len(self.targets_to_delete) > 0:
             try:
