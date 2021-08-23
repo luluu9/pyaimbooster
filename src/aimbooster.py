@@ -56,7 +56,7 @@ class ScoreCounter():
 class Target():
     def __init__(self, start_max=False, forbidden_rects=[]):
         self.forbidden_rects = forbidden_rects
-        self.max_radius = 100
+        self.max_radius = 50
         self.reached_max = False
         self.pos = self.get_allowed_pos()
         self.radius = 0
@@ -141,14 +141,15 @@ class Game():
         self.change_game_mode("Lobby")
 
     def change_game_mode(self, game_mode):
-        self.reset_events()
         if game_mode == "Lobby":
             self._load_lobby()
         elif game_mode == "Summary":
             self._load_summary(previous_game_mode=self.game_mode)
         elif game_mode == "Arcade":
+            self.reset_events()
             self._load_arcade()
         elif game_mode == "Speedy fingers":
+            self.reset_events()
             self._load_speedy_fingers()
         else:
             raise Exception("There is no provided game mode: " + str(game_mode))
@@ -324,8 +325,8 @@ class Game():
 
 
 # BASE SETTINGS
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
+SCREEN_WIDTH = 1000
+SCREEN_HEIGHT = 1000
 FPS = 60
 
 # PYGAME INIT
