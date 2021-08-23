@@ -85,11 +85,13 @@ class Target():
         return (x, y)
 
 
-# Button with background
-class ButtonWB(): 
-    def __init__(self, font, text, text_color, text_rect, background_rect=None, background_color=(0,0,0), border_radius=0):
-        if background_rect:
-             self.background_rect = pygame.draw.rect(screen, background_color, background_rect, border_radius)
+# Button with an outline and a callback
+class Button(): 
+    def __init__(self, font, text, text_color, text_rect, padding=0, outline_color=(0,0,0), outline_radius=0, custom_outline_rect=None):
+        if custom_outline_rect:
+            self.button_rect = pygame.draw.rect(screen, outline_color, custom_outline_rect, outline_radius)
+        else:
+            self.button_rect = pygame.draw.rect(screen, outline_color, text_rect.inflate(padding, padding), outline_radius)
         self.text_rect = font.render_to(screen, text_rect, text, text_color)
 
     def set_callback(self, callback, *args, **kwargs):
@@ -98,11 +100,8 @@ class ButtonWB():
         self.callback_kwargs = kwargs
 
     def check_click(self, mouse_pos):
-        if self.background_rect:
-            if self.background_rect.collidepoint(mouse_pos):
-                self.callback(*self.callback_args, **self.callback_kwargs)
-        else:
-            if self.text_rect.collidepoint(mouse_pos):
+        if self.button_rect:
+            if self.button_rect.collidepoint(mouse_pos):
                 self.callback(*self.callback_args, **self.callback_kwargs)
 
 
@@ -144,7 +143,7 @@ class Game():
             background_rect = background_rect.inflate(15, 15) # make some space around
             
             # create and render button  
-            button = ButtonWB(font, gamemode, lobby_color, text_rect, background_rect, lobby_color, 5)
+            button = Button(font, gamemode, lobby_color, text_rect, outline_color=lobby_color, outline_radius=5, custom_outline_rect=background_rect)
            
             # set callbacks to change game mode
             if gamemode == "Arcade":
@@ -172,12 +171,12 @@ class Game():
         play_rect = font.get_rect("Play again", size=summary_fontsize) 
         play_rect.midright = midbottom
         play_rect.move_ip(-button_padding, -summary_fontsize) # to give some space between buttons
-        play_button = ButtonWB(font, "Play again", summary_color, play_rect, play_rect.inflate(button_padding, button_padding), summary_color, 5)
+        play_button = Button(font, "Play again", summary_color, play_rect, button_padding, summary_color, 5)
         
         return_rect = font.get_rect("Return", size=summary_fontsize) 
         return_rect.midleft = midbottom
         return_rect.move_ip(button_padding, -summary_fontsize)
-        return_button = ButtonWB(font, "Return", summary_color, return_rect, return_rect.inflate(button_padding, button_padding), summary_color, 5)
+        return_button = Button(font, "Return", summary_color, return_rect, button_padding, summary_color, 5)
 
         # show stats
         start = pygame.Rect(play_rect.x, 150, 1, 1)
