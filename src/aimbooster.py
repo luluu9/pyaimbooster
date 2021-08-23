@@ -54,13 +54,13 @@ class ScoreCounter():
     
 
 class Target():
-    def __init__(self, start_max=False):
-        self.max_radius = 50
+    def __init__(self, start_max=False, forbidden_rects=[]):
+        self.forbidden_rects = forbidden_rects
+        self.max_radius = 100
         self.reached_max = False
-        self.pos = self.get_random_pos(self.max_radius)
+        self.pos = self.get_allowed_pos()
         self.radius = 0
         self.outline_margin = 4
-        self.start_max = False
         if start_max:
             self.radius = self.max_radius
     
@@ -89,6 +89,31 @@ class Target():
         x = random.randint(margin, SCREEN_WIDTH-margin)
         y = random.randint(margin, SCREEN_HEIGHT-margin)
         return (x, y)
+    
+    # get free space for spawn
+    def get_allowed_pos(self):
+        for i in range(200): # to prevent freezing if there is no more space for targets
+            pos = self.get_random_pos(self.max_radius)
+            if not self.rect_in_forbidden_area(pos):
+                return pos
+        return (100, 100)
+
+    # check if targets would overlap
+    def rect_in_forbidden_area(self, pos):
+        rect_to_check = self.get_final_rect(pos)
+        for rect in self.forbidden_rects:
+            if rect.colliderect(rect_to_check):
+                return True
+        return False
+    
+    # get max occupied space as rect
+    def get_final_rect(self, center=None):
+        rect = pygame.Rect((0, 0), (self.max_radius*2, self.max_radius*2))
+        if center == None:
+            rect.center = self.pos
+        else:
+            rect.center = center
+        return rect
 
 
 # Button with an outline and a callback
@@ -208,7 +233,9 @@ class Game():
         pygame.time.set_timer(ADD_TARGET, int(1000/TARGET_SPAWNRATE))
 
     def _load_speedy_fingers(self):
-        self.targets = [Target(start_max=True) for i in range(5)]
+        for i in range(5):
+            target = Target(start_max=True, forbidden_rects=self.get_occupied_rects())
+            self.targets.append(target)
 
     def frame(self):
         if self.game_mode == "Lobby":
@@ -243,7 +270,7 @@ class Game():
                         self.targets_to_delete.append(target)
                 self.scoreCounter.add_shoot()
             elif event.type == ADD_TARGET:
-                self.targets.append(Target())
+                self.targets.append(Target(forbidden_rects=self.get_occupied_rects()))
                 
         # update targets size and draw
         for target in self.targets:
@@ -273,7 +300,7 @@ class Game():
                         pygame.event.post(pygame.event.Event(ADD_TARGET))
                 self.scoreCounter.add_shoot()
             elif event.type == ADD_TARGET:
-                self.targets.append(Target(start_max=True))
+                self.targets.append(Target(start_max=True, forbidden_rects=self.get_occupied_rects()))
 
         # draw targets
         for target in self.targets:
@@ -288,6 +315,12 @@ class Game():
         
         # update counter
         self.scoreCounter.update()
+
+    def get_occupied_rects(self):
+        occupied = []
+        for target in self.targets:
+            occupied.append(target.get_final_rect())
+        return occupied
 
 
 # BASE SETTINGS
@@ -346,5 +379,4 @@ pygame.quit()
 
 # todo
 # - add training modes
-# - forbid to spawn new target onto other target
 # - save stats
