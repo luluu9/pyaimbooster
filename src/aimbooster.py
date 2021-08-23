@@ -266,9 +266,13 @@ class Game():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 for target in self.targets:
                     if target.mouse_collides(pygame.mouse.get_pos()):
+                        hit_sound.play()
                         self.scoreCounter.add_hit()
                         self.scoreCounter.add_target()
                         self.targets_to_delete.append(target)
+                        break
+                else:
+                    miss_sound.play()
                 self.scoreCounter.add_shoot()
             elif event.type == ADD_TARGET:
                 self.targets.append(Target(forbidden_rects=self.get_occupied_rects()))
@@ -295,10 +299,14 @@ class Game():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 for target in self.targets:
                     if target.mouse_collides(pygame.mouse.get_pos()):
+                        hit_sound.play()
                         self.scoreCounter.add_hit()
                         self.scoreCounter.add_target()
                         self.targets_to_delete.append(target)
                         pygame.event.post(pygame.event.Event(ADD_TARGET))
+                        break
+                else:
+                    miss_sound.play()
                 self.scoreCounter.add_shoot()
             elif event.type == ADD_TARGET:
                 self.targets.append(Target(start_max=True, forbidden_rects=self.get_occupied_rects()))
@@ -325,8 +333,8 @@ class Game():
 
 
 # BASE SETTINGS
-SCREEN_WIDTH = 1000
-SCREEN_HEIGHT = 1000
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
 FPS = 60
 
 # PYGAME INIT
@@ -347,6 +355,11 @@ lobby_fontsize = 40
 summary_bg_color = background_color
 summary_color = score_color
 summary_fontsize = 30
+
+# SOUND
+pygame.mixer.init()
+hit_sound = pygame.mixer.Sound("src/sounds/hit.wav")
+miss_sound = pygame.mixer.Sound("src/sounds/miss2.wav")
 
 # GAME MECHANICS
 TARGET_SPAWNRATE = 3 # targets per second 
