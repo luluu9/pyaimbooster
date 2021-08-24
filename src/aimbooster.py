@@ -8,7 +8,8 @@ from pygame.locals import (
     QUIT,
     KEYDOWN,
     K_s,
-    K_r
+    K_r,
+    K_ESCAPE
 )
 
 
@@ -377,7 +378,7 @@ while running:
         if event.type == QUIT:
             running = False
         elif event.type == KEYDOWN:
-            if event.key == K_s:
+            if event.key == K_s or event.key == K_ESCAPE:
                 # return to prevent updating screen with targets after summary shows up
                 game.change_game_mode("Summary")
                 continue
