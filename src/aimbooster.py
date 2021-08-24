@@ -21,6 +21,8 @@ class ScoreCounter():
         self.font = pygame.freetype.Font(default_font, self.font_size)
         self.shoots = 0
         self.start_time = time.time()
+        self.last_hit_time = None
+        self.reaction_times = []
     
     def update(self):
         text = f"{self.hits}/{self.all_targets}"
@@ -30,6 +32,10 @@ class ScoreCounter():
 
     def add_hit(self):
         self.hits += 1
+        if self.last_hit_time:
+            reaction = time.time()-self.last_hit_time
+            self.reaction_times.append(reaction) 
+        self.last_hit_time = time.time()
     
     def add_target(self):
         self.all_targets += 1
@@ -52,6 +58,14 @@ class ScoreCounter():
     
     def get_all_targets(self):
         return self.all_targets
+    
+    def get_median_reaction_time(self):
+        def median(data):
+            data.sort()
+            mid = len(data) // 2
+            return (data[mid] + data[~mid]) / 2
+
+        return median(self.reaction_times)
     
 
 class Target():
@@ -205,7 +219,8 @@ class Game():
         screen.fill(summary_bg_color)
         font = pygame.freetype.Font(default_font, summary_fontsize)
         gap = summary_fontsize * 1.5
-        hits_ratio = f"{self.scoreCounter.get_hits()}/{self.scoreCounter.get_all_targets()}" 
+        hits_ratio = f"{self.scoreCounter.get_hits()}/{self.scoreCounter.get_all_targets()}"
+        response_time = f"{int(self.scoreCounter.get_median_reaction_time()*1000)} msec"
 
         # create buttons
         midbottom = screen.get_rect().midbottom 
@@ -225,6 +240,7 @@ class Game():
         show_variable("Hits", hits_ratio, start.move(0, gap))
         show_variable("Accuracy", f"{self.scoreCounter.get_accuracy()}%", start)
         show_variable("Time", f"{self.scoreCounter.get_time()} s", start.move(0, gap*2))
+        show_variable("M. response", response_time, start.move(0, gap*3))
 
         # set up callbacks
         play_button.set_callback(self.change_game_mode, previous_game_mode)
