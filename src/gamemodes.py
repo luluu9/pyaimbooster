@@ -1,11 +1,13 @@
 import pygame
 import random
-from config import Settings
+import configparser
+from config import SETTINGS
 from components import Button
 from appearance import (lobby_bg_color, lobby_color, lobby_fontsize, default_font,
                        summary_bg_color, summary_color, summary_fontsize,
                        background_color, outline_color, filling_color)
 from sounds import (hit_sound, miss_sound)
+
 
 # BLUEPRINT:
 # class GameMode():
@@ -20,7 +22,7 @@ from sounds import (hit_sound, miss_sound)
 
 
 class Target():
-    def __init__(self, screen, start_max=False, forbidden_rects=[], max_radius=50):
+    def __init__(self, screen, start_max=False, forbidden_rects=[], max_radius=50, ):
         self.screen = screen
         self.forbidden_rects = forbidden_rects
         self.max_radius = max_radius
@@ -53,8 +55,8 @@ class Target():
             return True
     
     def get_random_pos(self, margin=0):
-        x = random.randint(margin, Settings.SCREEN_WIDTH-margin)
-        y = random.randint(margin, Settings.SCREEN_HEIGHT-margin)
+        x = random.randint(margin, SETTINGS.SCREEN_WIDTH-margin)
+        y = random.randint(margin, SETTINGS.SCREEN_HEIGHT-margin)
         return (x, y)
     
     # get free space for spawn
@@ -319,5 +321,5 @@ class AWP(ShootingMode):
         self.scoreCounter.update()
 
     def add_target(self):
-        new_target = Target(self.screen, start_max=True, max_radius=10)
+        new_target = Target(self.screen, **SETTINGS.AWP.target_settings)
         self.targets.append(new_target)

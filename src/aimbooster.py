@@ -3,7 +3,7 @@ import pygame.freetype
 import time
 import gamemodes
 from pygame.constants import USEREVENT
-from config import Settings
+from config import SETTINGS
 from appearance import (default_font, score_color)
 
 from pygame.locals import (
@@ -13,6 +13,7 @@ from pygame.locals import (
     K_r,
     K_ESCAPE
 )
+
 
 
 class ScoreCounter():
@@ -104,7 +105,7 @@ class Game():
 # PYGAME INIT
 pygame.init()
 pygame.display.set_caption('aimbooster v.0.0.3')
-screen = pygame.display.set_mode((Settings.SCREEN_WIDTH, Settings.SCREEN_HEIGHT))
+screen = pygame.display.set_mode((SETTINGS.SCREEN_WIDTH, SETTINGS.SCREEN_HEIGHT))
 clock = pygame.time.Clock()
 
 # LOAD GAME
@@ -136,7 +137,7 @@ while running:
     game.frame()
     # refresh display
     pygame.display.update()
-    clock.tick(Settings.FPS)
+    clock.tick(SETTINGS.FPS)
 pygame.quit()
 
 
