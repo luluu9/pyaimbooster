@@ -4,6 +4,7 @@ import random
 import time
 import gamemodes
 from pygame.constants import USEREVENT
+from appearance import (default_font, score_color, outline_color, filling_color)
 
 from pygame.locals import (
     QUIT,
@@ -155,120 +156,33 @@ class Button():
 
 class Game():
     def __init__(self):
+        self.events = {}
         self.change_game_mode("Lobby")
 
     def change_game_mode(self, game_mode):
         if game_mode == "Lobby":
             self.game_mode_obj = gamemodes.Lobby(screen, self)
-            self.game_mode_obj.load()
         elif game_mode == "Summary":
             self.game_mode_obj = gamemodes.Summary(screen, self)
-            self.game_mode_obj.load()
         elif game_mode == "Arcade":
-            self.reset_events()
-            self._load_arcade()
+            self.game_mode_obj = gamemodes.Arcade(screen, self)
         elif game_mode == "Speedy fingers":
-            self.reset_events()
-            self._load_speedy_fingers()
+            self.game_mode_obj = gamemodes.SpeedyFingers(screen, self)
         else:
             raise Exception("There is no provided game mode: " + str(game_mode))
+        self.game_mode_obj.load()
         self.game_mode = game_mode
     
-    def reset_events(self):
-        pygame.time.set_timer(ADD_TARGET, 0)
+    def reset(self):
+        for event in self.events.values():
+            pygame.time.set_timer(event, 0)
         self.scoreCounter = ScoreCounter()
-        self.targets = []
-        self.targets_to_delete = []
-
-    def _load_arcade(self):
-        pygame.time.set_timer(ADD_TARGET, int(1000/TARGET_SPAWNRATE))
-
-    def _load_speedy_fingers(self):
-        for i in range(5):
-            target = Target(start_max=True, forbidden_rects=self.get_occupied_rects())
-            self.targets.append(target)
 
     def frame(self):
-        if self.game_mode == "Lobby":
-            self.game_mode_obj.frame()
-        elif self.game_mode == "Summary":
-            self.game_mode_obj.frame()
-        elif self.game_mode == "Arcade":
-            self._arcade_frame()
-        elif self.game_mode == "Speedy fingers":
-            self._speedy_fingers_frame()
+        self.game_mode_obj.frame()
 
-
-    def _arcade_frame(self):
-        screen.fill(background_color)
-        for event in pygame.event.get():
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                for target in self.targets:
-                    if target.mouse_collides(pygame.mouse.get_pos()):
-                        hit_sound.play()
-                        self.scoreCounter.add_hit()
-                        self.scoreCounter.add_target()
-                        self.targets_to_delete.append(target)
-                        break
-                else:
-                    miss_sound.play()
-                self.scoreCounter.add_shoot()
-            elif event.type == ADD_TARGET:
-                self.targets.append(Target(forbidden_rects=self.get_occupied_rects()))
-                
-        # update targets size and draw
-        for target in self.targets:
-            if target.update() == False:
-                self.targets_to_delete.append(target)
-                self.scoreCounter.add_target()
-
-        # delete unused targets
-        while len(self.targets_to_delete) > 0:
-            try:
-                self.targets.remove(self.targets_to_delete.pop())
-            except ValueError: # probably double clicked faster than delta time
-                pass 
-        
-        # update counter
-        self.scoreCounter.update()
-
-    def _speedy_fingers_frame(self):
-        screen.fill(background_color)
-        for event in pygame.event.get():
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                for target in self.targets:
-                    if target.mouse_collides(pygame.mouse.get_pos()):
-                        hit_sound.play()
-                        self.scoreCounter.add_hit()
-                        self.scoreCounter.add_target()
-                        self.targets_to_delete.append(target)
-                        pygame.event.post(pygame.event.Event(ADD_TARGET))
-                        break
-                else:
-                    miss_sound.play()
-                self.scoreCounter.add_shoot()
-            elif event.type == ADD_TARGET:
-                self.targets.append(Target(start_max=True, forbidden_rects=self.get_occupied_rects()))
-
-        # draw targets
-        for target in self.targets:
-            target.draw()
-        
-        # delete unused targets
-        while len(self.targets_to_delete) > 0:
-            try:
-                self.targets.remove(self.targets_to_delete.pop())
-            except ValueError: # probably double clicked faster than delta time
-                pass 
-        
-        # update counter
-        self.scoreCounter.update()
-
-    def get_occupied_rects(self):
-        occupied = []
-        for target in self.targets:
-            occupied.append(target.get_final_rect())
-        return occupied
+    def add_target(self, start_max=False, forbidden_rects=[]):
+        return Target(start_max=start_max, forbidden_rects=forbidden_rects)
 
 
 # BASE SETTINGS
@@ -282,32 +196,14 @@ pygame.display.set_caption('aimbooster v.0.0.2')
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
 
-# APPEARANCE 
-default_font = "src/fonts/no_continue.ttf"
-background_color = (222, 222, 222)
-outline_color = (0, 0, 0) 
-filling_color = (255, 255, 255)
-score_color = (74, 74, 74)
-lobby_bg_color = background_color
-lobby_color = score_color
-lobby_fontsize = 40
-summary_bg_color = background_color
-summary_color = score_color
-summary_fontsize = 30
-
-# SOUND
-pygame.mixer.init()
-hit_sound = pygame.mixer.Sound("src/sounds/hit.wav")
-miss_sound = pygame.mixer.Sound("src/sounds/miss2.wav")
-
-# GAME MECHANICS
-TARGET_SPAWNRATE = 3 # targets per second 
-
-# GAME EVENTS
-ADD_TARGET = USEREVENT + 1
-
 # LOAD GAME
 game = Game()
+
+# GAME EVENTS
+game.events["ADD_TARGET"] = USEREVENT + 1
+
+# GAME MECHANICS
+game.TARGET_SPAWNRATE = 3 # targets per second 
 
 # MAINLOOP
 running = True

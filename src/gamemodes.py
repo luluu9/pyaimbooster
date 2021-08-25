@@ -3,17 +3,19 @@ from components import Button
 from appearance import (lobby_bg_color, lobby_color, lobby_fontsize, default_font,
                        summary_bg_color, summary_color, summary_fontsize,
                        background_color,)
+from sounds import (hit_sound, miss_sound)
 
 # BLUEPRINT:
 # class GameMode():
 #     def __init__(self, screen):
 #         self.screen = screen
 
-#     def load():
+#     def load(self):
 #         pass
 
-#     def frame():
+#     def frame(self):
 #         pass
+
 
 class StaticButtons():
     def frame(self):
@@ -21,6 +23,22 @@ class StaticButtons():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 for button in self.buttons:
                     button.check_click(pygame.mouse.get_pos())
+
+
+class ShootingMode():
+    def __init__(self, screen, game):
+        game.reset() # reset events and scoreboard
+        self.screen = screen
+        self.game = game
+        self.scoreCounter = game.scoreCounter
+        self.targets_to_delete = []
+        self.targets = []
+
+    def get_occupied_rects(self):
+        occupied = []
+        for target in self.targets:
+            occupied.append(target.get_final_rect())
+        return occupied
 
 
 class Lobby(StaticButtons):
@@ -110,3 +128,83 @@ class Summary(StaticButtons):
 
 
 
+class Arcade(ShootingMode):
+    def __init__(self, screen, game):
+        super().__init__(screen, game)
+
+    def load(self):
+        pygame.time.set_timer(self.game.events["ADD_TARGET"], int(1000/self.game.TARGET_SPAWNRATE))
+
+    def frame(self):
+        self.screen.fill(background_color)
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                for target in self.targets:
+                    if target.mouse_collides(pygame.mouse.get_pos()):
+                        hit_sound.play()
+                        self.scoreCounter.add_hit()
+                        self.targets_to_delete.append(target)
+                        break
+                else:
+                    miss_sound.play()
+                self.scoreCounter.add_shoot()
+            elif event.type == self.game.events["ADD_TARGET"]:
+                self.targets.append(self.game.add_target(forbidden_rects=self.get_occupied_rects()))
+                
+        # update targets size and draw
+        for target in self.targets:
+            if target.update() == False:
+                self.targets_to_delete.append(target)
+
+        # delete unused targets
+        while len(self.targets_to_delete) > 0:
+            try:
+                self.targets.remove(self.targets_to_delete.pop())
+                self.scoreCounter.add_target()
+            except ValueError: # probably double clicked faster than delta time
+                pass 
+        
+        # update counter
+        self.scoreCounter.update()
+
+
+class SpeedyFingers(ShootingMode):
+    def __init__(self, screen, game):
+        super().__init__(screen, game)
+
+    def load(self):
+        for i in range(5):
+            target = self.game.add_target(start_max=True, forbidden_rects=self.get_occupied_rects())
+            self.targets.append(target)
+
+    def frame(self):
+        self.screen.fill(background_color)
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                self.scoreCounter.add_shoot()
+                for target in self.targets:
+                    if target.mouse_collides(pygame.mouse.get_pos()):
+                        hit_sound.play()
+                        self.scoreCounter.add_hit()
+                        self.scoreCounter.add_target()
+                        self.targets_to_delete.append(target)
+                        pygame.event.post(pygame.event.Event(self.game.events["ADD_TARGET"]))
+                        break
+                else:
+                    miss_sound.play()
+            elif event.type == self.game.events["ADD_TARGET"]:
+                self.targets.append(self.game.add_target(start_max=True, forbidden_rects=self.get_occupied_rects()))
+
+        # draw targets
+        for target in self.targets:
+            target.draw()
+        
+        # delete unused targets
+        while len(self.targets_to_delete) > 0:
+            try:
+                self.targets.remove(self.targets_to_delete.pop())
+            except ValueError: # probably double clicked faster than delta time
+                pass 
+        
+        # update counter
+        self.scoreCounter.update()
