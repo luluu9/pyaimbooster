@@ -1,8 +1,10 @@
 import pygame
+import random
+from config import Settings
 from components import Button
 from appearance import (lobby_bg_color, lobby_color, lobby_fontsize, default_font,
                        summary_bg_color, summary_color, summary_fontsize,
-                       background_color,)
+                       background_color, outline_color, filling_color)
 from sounds import (hit_sound, miss_sound)
 
 # BLUEPRINT:
@@ -15,6 +17,70 @@ from sounds import (hit_sound, miss_sound)
 
 #     def frame(self):
 #         pass
+
+
+class Target():
+    def __init__(self, screen, start_max=False, forbidden_rects=[], max_radius=50):
+        self.screen = screen
+        self.forbidden_rects = forbidden_rects
+        self.max_radius = max_radius
+        self.reached_max = False
+        self.pos = self.get_allowed_pos()
+        self.radius = 0
+        self.outline_margin = 4
+        if start_max:
+            self.radius = self.max_radius
+    
+    def update(self):
+        if self.radius < self.max_radius and not self.reached_max:
+            self.radius += 1
+        else:
+            self.reached_max = True
+            self.radius -= 1
+            # destroy this object if smaller than 1px
+            if self.radius <= 0:
+                return False 
+        self.draw()
+
+    def draw(self):
+        # draw outline
+        pygame.draw.circle(self.screen, outline_color, self.pos, self.radius, self.outline_margin)
+        # draw filling
+        pygame.draw.circle(self.screen, filling_color, self.pos, self.radius-self.outline_margin)
+
+    def mouse_collides(self, mouse_pos):
+        if pow((mouse_pos[0] - self.pos[0]), 2) + pow((mouse_pos[1] - self.pos[1]), 2) <= pow(self.radius, 2):
+            return True
+    
+    def get_random_pos(self, margin=0):
+        x = random.randint(margin, Settings.SCREEN_WIDTH-margin)
+        y = random.randint(margin, Settings.SCREEN_HEIGHT-margin)
+        return (x, y)
+    
+    # get free space for spawn
+    def get_allowed_pos(self):
+        for i in range(200): # to prevent freezing if there is no more space for targets
+            pos = self.get_random_pos(self.max_radius)
+            if not self.rect_in_forbidden_area(pos):
+                return pos
+        return (100, 100)
+
+    # check if targets would overlap
+    def rect_in_forbidden_area(self, pos):
+        rect_to_check = self.get_final_rect(pos)
+        for rect in self.forbidden_rects:
+            if rect.colliderect(rect_to_check):
+                return True
+        return False
+    
+    # get max occupied space as rect
+    def get_final_rect(self, center=None):
+        rect = pygame.Rect((0, 0), (self.max_radius*2, self.max_radius*2))
+        if center == None:
+            rect.center = self.pos
+        else:
+            rect.center = center
+        return rect
 
 
 class StaticButtons():
@@ -134,6 +200,7 @@ class Arcade(ShootingMode):
 
     def load(self):
         pygame.time.set_timer(self.game.events["ADD_TARGET"], int(1000/self.game.TARGET_SPAWNRATE))
+        self.add_target()
 
     def frame(self):
         self.screen.fill(background_color)
@@ -149,7 +216,7 @@ class Arcade(ShootingMode):
                     miss_sound.play()
                 self.scoreCounter.add_shoot()
             elif event.type == self.game.events["ADD_TARGET"]:
-                self.targets.append(self.game.add_target(forbidden_rects=self.get_occupied_rects()))
+                self.add_target()
                 
         # update targets size and draw
         for target in self.targets:
@@ -166,6 +233,11 @@ class Arcade(ShootingMode):
         
         # update counter
         self.scoreCounter.update()
+    
+    def add_target(self):
+        new_target = Target(self.screen, forbidden_rects=self.get_occupied_rects())
+        self.targets.append(new_target)
+
 
 
 class SpeedyFingers(ShootingMode):
@@ -174,8 +246,7 @@ class SpeedyFingers(ShootingMode):
 
     def load(self):
         for i in range(5):
-            target = self.game.add_target(start_max=True, forbidden_rects=self.get_occupied_rects())
-            self.targets.append(target)
+            target = self.add_target()
 
     def frame(self):
         self.screen.fill(background_color)
@@ -193,7 +264,7 @@ class SpeedyFingers(ShootingMode):
                 else:
                     miss_sound.play()
             elif event.type == self.game.events["ADD_TARGET"]:
-                self.targets.append(self.game.add_target(start_max=True, forbidden_rects=self.get_occupied_rects()))
+                self.add_target()
 
         # draw targets
         for target in self.targets:
@@ -208,3 +279,7 @@ class SpeedyFingers(ShootingMode):
         
         # update counter
         self.scoreCounter.update()
+
+    def add_target(self):
+        new_target = Target(self.screen, start_max=True, forbidden_rects=self.get_occupied_rects())
+        self.targets.append(new_target)

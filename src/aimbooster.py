@@ -1,10 +1,10 @@
 import pygame
 import pygame.freetype
-import random
 import time
 import gamemodes
 from pygame.constants import USEREVENT
-from appearance import (default_font, score_color, outline_color, filling_color)
+from config import Settings
+from appearance import (default_font, score_color)
 
 from pygame.locals import (
     QUIT,
@@ -69,89 +69,6 @@ class ScoreCounter():
             return (data[mid] + data[~mid]) / 2
 
         return median(self.reaction_times)
-    
-
-class Target():
-    def __init__(self, start_max=False, forbidden_rects=[]):
-        self.forbidden_rects = forbidden_rects
-        self.max_radius = 50
-        self.reached_max = False
-        self.pos = self.get_allowed_pos()
-        self.radius = 0
-        self.outline_margin = 4
-        if start_max:
-            self.radius = self.max_radius
-    
-    def update(self):
-        if self.radius < self.max_radius and not self.reached_max:
-            self.radius += 1
-        else:
-            self.reached_max = True
-            self.radius -= 1
-            # destroy this object if smaller than 1px
-            if self.radius <= 0:
-                return False 
-        self.draw()
-
-    def draw(self):
-        # draw outline
-        pygame.draw.circle(screen, outline_color, self.pos, self.radius, self.outline_margin)
-        # draw filling
-        pygame.draw.circle(screen, filling_color, self.pos, self.radius-self.outline_margin)
-
-    def mouse_collides(self, mouse_pos):
-        if pow((mouse_pos[0] - self.pos[0]), 2) + pow((mouse_pos[1] - self.pos[1]), 2) <= pow(self.radius, 2):
-            return True
-    
-    def get_random_pos(self, margin=0):
-        x = random.randint(margin, SCREEN_WIDTH-margin)
-        y = random.randint(margin, SCREEN_HEIGHT-margin)
-        return (x, y)
-    
-    # get free space for spawn
-    def get_allowed_pos(self):
-        for i in range(200): # to prevent freezing if there is no more space for targets
-            pos = self.get_random_pos(self.max_radius)
-            if not self.rect_in_forbidden_area(pos):
-                return pos
-        return (100, 100)
-
-    # check if targets would overlap
-    def rect_in_forbidden_area(self, pos):
-        rect_to_check = self.get_final_rect(pos)
-        for rect in self.forbidden_rects:
-            if rect.colliderect(rect_to_check):
-                return True
-        return False
-    
-    # get max occupied space as rect
-    def get_final_rect(self, center=None):
-        rect = pygame.Rect((0, 0), (self.max_radius*2, self.max_radius*2))
-        if center == None:
-            rect.center = self.pos
-        else:
-            rect.center = center
-        return rect
-
-
-# Button with an outline and a callback
-class Button(): 
-    def __init__(self, font, text, text_color, text_rect, padding=0, outline_color=(0,0,0), outline_radius=0, custom_outline_rect=None):
-        if custom_outline_rect:
-            self.button_rect = pygame.draw.rect(screen, outline_color, custom_outline_rect, outline_radius)
-        else:
-            self.button_rect = pygame.draw.rect(screen, outline_color, text_rect.inflate(padding, padding), outline_radius)
-        self.text_rect = font.render_to(screen, text_rect, text, text_color)
-
-    def set_callback(self, callback, *args, **kwargs):
-        self.callback = callback
-        self.callback_args = args
-        self.callback_kwargs = kwargs
-
-    def check_click(self, mouse_pos):
-        if self.button_rect:
-            if self.button_rect.collidepoint(mouse_pos):
-                self.callback(*self.callback_args, **self.callback_kwargs)
 
 
 class Game():
@@ -181,19 +98,11 @@ class Game():
     def frame(self):
         self.game_mode_obj.frame()
 
-    def add_target(self, start_max=False, forbidden_rects=[]):
-        return Target(start_max=start_max, forbidden_rects=forbidden_rects)
-
-
-# BASE SETTINGS
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
-FPS = 60
 
 # PYGAME INIT
 pygame.init()
-pygame.display.set_caption('aimbooster v.0.0.2')
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption('aimbooster v.0.0.3')
+screen = pygame.display.set_mode((Settings.SCREEN_WIDTH, Settings.SCREEN_HEIGHT))
 clock = pygame.time.Clock()
 
 # LOAD GAME
@@ -212,17 +121,20 @@ while running:
         if event.type == QUIT:
             running = False
         elif event.type == KEYDOWN:
+            # Go to summary
             if event.key == K_s or event.key == K_ESCAPE:
-                # return to prevent updating screen with targets after summary shows up
-                game.change_game_mode("Summary")
-                continue
+                # continue to prevent updating screen with targets after summary shows up
+                if game.game_mode != "Summary": # to prevent looping in summary
+                    game.change_game_mode("Summary")
+                    continue
+            # Restart
             elif event.key == K_r:
                 game.change_game_mode(game.game_mode)
                 continue
     game.frame()
     # refresh display
     pygame.display.update()
-    clock.tick(FPS)
+    clock.tick(Settings.FPS)
 pygame.quit()
 
 
