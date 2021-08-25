@@ -115,7 +115,7 @@ class Lobby(StaticButtons):
 
     def load(self):
         self.screen.fill(lobby_bg_color)
-        gamemodes = ["Arcade", "Speedy fingers", "XXX"]
+        gamemodes = ["Arcade", "Speedy fingers", "AWP"]
         # prepare variables for text
         font = pygame.freetype.Font(default_font, lobby_fontsize)
         gap = lobby_fontsize * 1.3
@@ -136,12 +136,7 @@ class Lobby(StaticButtons):
             button = Button(self.screen, font, gamemode, lobby_color, text_rect, outline_color=lobby_color, outline_radius=5, custom_outline_rect=background_rect)
         
             # set callbacks to change game mode
-            if gamemode == "Arcade":
-                button.set_callback(self.game.change_game_mode, "Arcade")
-            elif gamemode == "Speedy fingers":
-                button.set_callback(self.game.change_game_mode, "Speedy fingers")
-            else: 
-                button.set_callback(self.game.change_game_mode, "Lobby") # placeholder
+            button.set_callback(self.game.change_game_mode, gamemode)
             self.buttons.append(button)
 
 
@@ -239,14 +234,13 @@ class Arcade(ShootingMode):
         self.targets.append(new_target)
 
 
-
 class SpeedyFingers(ShootingMode):
     def __init__(self, screen, game):
         super().__init__(screen, game)
 
     def load(self):
         for i in range(5):
-            target = self.add_target()
+            self.add_target()
 
     def frame(self):
         self.screen.fill(background_color)
@@ -282,4 +276,48 @@ class SpeedyFingers(ShootingMode):
 
     def add_target(self):
         new_target = Target(self.screen, start_max=True, forbidden_rects=self.get_occupied_rects())
+        self.targets.append(new_target)
+
+
+class AWP(ShootingMode):
+    def __init__(self, screen, game):
+        super().__init__(screen, game)
+
+    def load(self):
+        self.add_target()
+
+    def frame(self):
+        self.screen.fill(background_color)
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                self.scoreCounter.add_shoot()
+                for target in self.targets:
+                    if target.mouse_collides(pygame.mouse.get_pos()):
+                        hit_sound.play()
+                        self.scoreCounter.add_hit()
+                        self.scoreCounter.add_target()
+                        self.targets_to_delete.append(target)
+                        pygame.event.post(pygame.event.Event(self.game.events["ADD_TARGET"]))
+                        break
+                else:
+                    miss_sound.play()
+            elif event.type == self.game.events["ADD_TARGET"]:
+                self.add_target()
+
+        # draw targets
+        for target in self.targets:
+            target.draw()
+        
+        # delete unused targets
+        while len(self.targets_to_delete) > 0:
+            try:
+                self.targets.remove(self.targets_to_delete.pop())
+            except ValueError: # probably double clicked faster than delta time
+                pass 
+        
+        # update counter
+        self.scoreCounter.update()
+
+    def add_target(self):
+        new_target = Target(self.screen, start_max=True, max_radius=10)
         self.targets.append(new_target)

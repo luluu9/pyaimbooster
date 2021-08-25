@@ -85,6 +85,8 @@ class Game():
             self.game_mode_obj = gamemodes.Arcade(screen, self)
         elif game_mode == "Speedy fingers":
             self.game_mode_obj = gamemodes.SpeedyFingers(screen, self)
+        elif game_mode == "AWP":
+            self.game_mode_obj = gamemodes.AWP(screen, self)
         else:
             raise Exception("There is no provided game mode: " + str(game_mode))
         self.game_mode_obj.load()
@@ -141,3 +143,4 @@ pygame.quit()
 # todo
 # - add training modes
 # - save stats
+# - one-minute challenges
