@@ -15,7 +15,6 @@ from pygame.locals import (
 )
 
 
-
 class ScoreCounter():
     def __init__(self):
         self.hits = 0

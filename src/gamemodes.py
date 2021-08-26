@@ -1,6 +1,5 @@
 import pygame
 import random
-import configparser
 from config import SETTINGS
 from components import Button
 from appearance import (lobby_bg_color, lobby_color, lobby_fontsize, default_font,
@@ -22,26 +21,28 @@ from sounds import (hit_sound, miss_sound)
 
 
 class Target():
-    def __init__(self, screen, start_max=False, forbidden_rects=[], max_radius=50, ):
+    def __init__(self, screen, grow=False, max_radius=50, outline_margin=4, forbidden_rects=[]):
+        self.radius = 0
         self.screen = screen
         self.forbidden_rects = forbidden_rects
         self.max_radius = max_radius
-        self.reached_max = False
+        self.grow = grow
+        self.outline_margin = outline_margin
         self.pos = self.get_allowed_pos()
-        self.radius = 0
-        self.outline_margin = 4
-        if start_max:
+        self.reached_max = False
+        if not grow:
             self.radius = self.max_radius
     
     def update(self):
-        if self.radius < self.max_radius and not self.reached_max:
-            self.radius += 1
-        else:
-            self.reached_max = True
-            self.radius -= 1
-            # destroy this object if smaller than 1px
-            if self.radius <= 0:
-                return False 
+        if self.grow:
+            if self.radius < self.max_radius and not self.reached_max:
+                self.radius += 1
+            else:
+                self.reached_max = True
+                self.radius -= 1
+                # destroy this object if smaller than 1px
+                if self.radius <= 0:
+                    return False 
         self.draw()
 
     def draw(self):
@@ -190,7 +191,6 @@ class Summary(StaticButtons):
         self.buttons = (play_button, return_button)
 
 
-
 class Arcade(ShootingMode):
     def __init__(self, screen, game):
         super().__init__(screen, game)
@@ -226,13 +226,13 @@ class Arcade(ShootingMode):
                 self.targets.remove(self.targets_to_delete.pop())
                 self.scoreCounter.add_target()
             except ValueError: # probably double clicked faster than delta time
-                pass 
+                pass
         
         # update counter
         self.scoreCounter.update()
     
     def add_target(self):
-        new_target = Target(self.screen, forbidden_rects=self.get_occupied_rects())
+        new_target = Target(self.screen, **SETTINGS.Arcade.target_settings, forbidden_rects=self.get_occupied_rects())
         self.targets.append(new_target)
 
 
@@ -241,7 +241,7 @@ class SpeedyFingers(ShootingMode):
         super().__init__(screen, game)
 
     def load(self):
-        for i in range(5):
+        for i in range(SETTINGS.SpeedyFingers.targets_amount):
             self.add_target()
 
     def frame(self):
@@ -277,7 +277,7 @@ class SpeedyFingers(ShootingMode):
         self.scoreCounter.update()
 
     def add_target(self):
-        new_target = Target(self.screen, start_max=True, forbidden_rects=self.get_occupied_rects())
+        new_target = Target(self.screen, **SETTINGS.SpeedyFingers.target_settings, forbidden_rects=self.get_occupied_rects())
         self.targets.append(new_target)
 
 
