@@ -103,7 +103,6 @@ class Game():
 
 # PYGAME INIT
 pygame.init()
-pygame.display.set_caption('aimbooster v.0.0.3')
 screen = pygame.display.set_mode((SETTINGS.SCREEN_WIDTH, SETTINGS.SCREEN_HEIGHT))
 clock = pygame.time.Clock()
 
@@ -119,6 +118,7 @@ game.TARGET_SPAWNRATE = 3 # targets per second
 # MAINLOOP
 running = True
 while running:
+    pygame.display.set_caption("FPS: " + str(int(clock.get_fps())))
     for event in pygame.event.get((QUIT, KEYDOWN)):
         if event.type == QUIT:
             running = False
