@@ -74,8 +74,8 @@ class ScoreCounter():
 class Game():
     def __init__(self):
         self.events = {}
-        self.change_game_mode("Lobby")
         self.challenge = False
+        self.change_game_mode("Lobby")
 
     def change_game_mode(self, game_mode):
         if game_mode == "Lobby":
@@ -115,6 +115,7 @@ game = Game()
 
 # GAME EVENTS
 game.events["ADD_TARGET"] = USEREVENT + 1
+game.events["END_CHALLENGE"] = USEREVENT + 2
 
 # GAME MECHANICS
 game.TARGET_SPAWNRATE = 3 # targets per second 
@@ -123,7 +124,7 @@ game.TARGET_SPAWNRATE = 3 # targets per second
 running = True
 while running:
     pygame.display.set_caption("FPS: " + str(int(clock.get_fps())))
-    for event in pygame.event.get((QUIT, KEYDOWN)):
+    for event in pygame.event.get((QUIT, KEYDOWN, game.events["END_CHALLENGE"])):
         if event.type == QUIT:
             running = False
         elif event.type == KEYDOWN:
@@ -137,6 +138,9 @@ while running:
             elif event.key == K_r:
                 game.change_game_mode(game.game_mode)
                 continue
+        elif event.type == game.events["END_CHALLENGE"]:
+            if game.game_mode != "Summary": # to prevent reloading summary
+                game.change_game_mode("Summary")
     game.frame()
     # refresh display
     pygame.display.update()
@@ -147,4 +151,3 @@ pygame.quit()
 # todo
 # - add training modes
 # - save stats
-# - one-minute challenges

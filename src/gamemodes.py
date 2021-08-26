@@ -97,6 +97,9 @@ class StaticButtons():
 class ShootingMode():
     def __init__(self, screen, game):
         game.reset() # reset events and scoreboard
+        if game.challenge == True:
+            print("")
+            pygame.time.set_timer(game.events["END_CHALLENGE"], SETTINGS.CHALLENGE_TIME, True)
         self.screen = screen
         self.game = game
         self.scoreCounter = game.scoreCounter
@@ -148,6 +151,10 @@ class Lobby(StaticButtons):
         switch = Switch(self.screen, font, "Training", "Challng", lobby_color, text_rect)
         switch.set_callback(self.game.set_challenge)
         self.buttons.append(switch)
+
+        # Check if switch was toggled earlier
+        if self.game.challenge == True:
+            switch.toggle() 
 
 
 class Summary(StaticButtons):

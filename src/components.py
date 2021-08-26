@@ -2,6 +2,7 @@ import pygame
 from pygame import draw
 from appearance import lobby_bg_color, switch_filling_color, switch_toggle_outline
 
+
 # Button with an outline and a callback
 class Button(): 
     def __init__(self, screen, font, text, text_color, text_rect, padding=0, outline_color=(0,0,0), outline_radius=0, custom_outline_rect=None):
