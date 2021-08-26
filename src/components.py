@@ -1,4 +1,6 @@
 import pygame
+from pygame import draw
+from appearance import lobby_bg_color, switch_filling_color, switch_toggle_outline
 
 # Button with an outline and a callback
 class Button(): 
@@ -18,3 +20,50 @@ class Button():
         if self.button_rect:
             if self.button_rect.collidepoint(mouse_pos):
                 self.callback(*self.callback_args, **self.callback_kwargs)
+
+
+# Switch button with text change on toggle
+class Switch(): 
+    def __init__(self, screen, font, off_text, on_text, text_color, text_rect):
+        self.screen = screen
+        self.font = font
+        self.text_color = text_color
+        self.text_rect = text_rect
+        self.current_text = off_text
+        self.off_text = off_text
+        self.on_text = on_text
+        self.draw()
+
+    def toggle(self):
+        if self.current_text == self.off_text:
+            self.current_text = self.on_text
+        else:
+            self.current_text = self.off_text
+        # clear screen and draw
+        self.screen.fill(lobby_bg_color, self.switch_outline)
+        self.screen.fill(lobby_bg_color, self.text_rect)
+        self.draw()
+
+    def draw(self):
+        outline = 5
+        # draw text
+        self.text_rect = self.font.render_to(self.screen, self.text_rect, self.current_text, self.text_color)
+        # prepare rect for switch, move down and size down
+        self.switch_rect = self.text_rect.move(0, self.text_rect.height*1.3).inflate(-self.text_rect.width/2, 0) 
+        # fill switch with color
+        self.filling_rect = pygame.draw.rect(self.screen, switch_filling_color, self.switch_rect)
+        # create outline for switch
+        self.switch_outline = pygame.draw.rect(self.screen, self.text_color, self.switch_rect, outline)
+        # prepare size and position for toggle
+        self.toggle_size = (self.switch_rect.width/2, self.switch_rect.height-outline*2)
+        if self.current_text == self.on_text:
+            self.toggle_position = (self.switch_rect.right-outline/2-self.toggle_size[0], self.switch_rect.y+outline)
+        else:
+            self.toggle_position = (self.switch_rect.x+outline/1.5, self.switch_rect.y+outline)
+        # create toggle rect
+        self.toggle_rect = pygame.draw.rect(self.screen, switch_toggle_outline, pygame.Rect(self.toggle_position, self.toggle_size), outline)
+
+    def check_click(self, mouse_pos):
+        if self.switch_rect:
+            if self.switch_rect.collidepoint(mouse_pos):
+                self.toggle()

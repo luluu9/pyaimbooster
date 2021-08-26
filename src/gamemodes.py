@@ -1,7 +1,7 @@
 import pygame
 import random
 from config import SETTINGS
-from components import Button
+from components import Button, Switch
 from appearance import (lobby_bg_color, lobby_color, lobby_fontsize, default_font,
                        summary_bg_color, summary_color, summary_fontsize,
                        background_color, outline_color, filling_color)
@@ -141,7 +141,12 @@ class Lobby(StaticButtons):
             # set callbacks to change game mode
             button.set_callback(self.game.change_game_mode, gamemode)
             self.buttons.append(button)
-
+        
+        # Create switch for challenge/training mode
+        text_rect = font.get_rect("Training", size=lobby_fontsize)
+        text_rect.topright = self.screen.get_rect().inflate(-20, -20).topright
+        switch = Switch(self.screen, font, "Training", "Challng", lobby_color, text_rect)
+        self.buttons.append(switch)
 
 class Summary(StaticButtons):
     def __init__(self, screen, game):
