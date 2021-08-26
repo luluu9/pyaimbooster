@@ -75,6 +75,7 @@ class Game():
     def __init__(self):
         self.events = {}
         self.change_game_mode("Lobby")
+        self.challenge = False
 
     def change_game_mode(self, game_mode):
         if game_mode == "Lobby":
@@ -92,11 +93,14 @@ class Game():
         self.game_mode_obj.load()
         self.game_mode = game_mode
     
+    def set_challenge(self, is_challenge):
+        self.challenge = is_challenge
+    
     def reset(self):
         for event in self.events.values():
             pygame.time.set_timer(event, 0)
         self.scoreCounter = ScoreCounter()
-
+    
     def frame(self):
         self.game_mode_obj.frame()
 

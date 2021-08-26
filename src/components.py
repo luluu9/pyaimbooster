@@ -35,14 +35,20 @@ class Switch():
         self.draw()
 
     def toggle(self):
-        if self.current_text == self.off_text:
-            self.current_text = self.on_text
-        else:
+        if self.is_on():
             self.current_text = self.off_text
+        else:
+            self.current_text = self.on_text
         # clear screen and draw
         self.screen.fill(lobby_bg_color, self.switch_outline)
         self.screen.fill(lobby_bg_color, self.text_rect)
         self.draw()
+
+    def is_on(self):
+        if self.current_text == self.on_text:
+            return True
+        else:
+            return False
 
     def draw(self):
         outline = 5
@@ -63,7 +69,12 @@ class Switch():
         # create toggle rect
         self.toggle_rect = pygame.draw.rect(self.screen, switch_toggle_outline, pygame.Rect(self.toggle_position, self.toggle_size), outline)
 
+    def set_callback(self, callback):
+        self.callback = callback
+
     def check_click(self, mouse_pos):
         if self.switch_rect:
             if self.switch_rect.collidepoint(mouse_pos):
                 self.toggle()
+                self.callback(self.is_on())
+

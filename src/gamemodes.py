@@ -146,7 +146,9 @@ class Lobby(StaticButtons):
         text_rect = font.get_rect("Training", size=lobby_fontsize)
         text_rect.topright = self.screen.get_rect().inflate(-20, -20).topright
         switch = Switch(self.screen, font, "Training", "Challng", lobby_color, text_rect)
+        switch.set_callback(self.game.set_challenge)
         self.buttons.append(switch)
+
 
 class Summary(StaticButtons):
     def __init__(self, screen, game):
