@@ -140,6 +140,10 @@ while running:
                 continue
         elif event.type == game.events["END_CHALLENGE"]:
             if game.game_mode != "Summary": # to prevent reloading summary
+                try:
+                    game.game_mode_obj.save_results()
+                except AttributeError:
+                    pass # save results method not implemented
                 game.change_game_mode("Summary")
     game.frame()
     # refresh display
@@ -148,6 +152,9 @@ while running:
 pygame.quit()
 
 
-# todo
+# todo:
 # - add training modes
 # - save stats
+
+# bugs:
+# - enter training, click escape, toggle to challenge mode, start training again (arcade)

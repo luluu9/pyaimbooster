@@ -1,5 +1,6 @@
 import pygame
 import random
+import history
 from config import SETTINGS
 from components import Button, Switch
 from appearance import (lobby_bg_color, lobby_color, lobby_fontsize, default_font,
@@ -111,6 +112,15 @@ class ShootingMode():
         for target in self.targets:
             occupied.append(target.get_final_rect())
         return occupied
+
+    
+    def save_results(self):
+        results = {
+            "Hits": self.scoreCounter.get_hits(),
+            "Accuracy": self.scoreCounter.get_accuracy(),
+            "Median response": self.scoreCounter.get_median_reaction_time()
+        }
+        history.add_results(type(self).__name__, results)
 
 
 class Lobby(StaticButtons):
