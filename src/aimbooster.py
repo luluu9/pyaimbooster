@@ -154,7 +154,4 @@ pygame.quit()
 
 # todo:
 # - add training modes
-# - save stats
-
-# bugs:
-# - enter training, click escape, toggle to challenge mode, start training again (arcade)
+# - show history on graph

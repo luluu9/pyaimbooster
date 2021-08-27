@@ -99,7 +99,6 @@ class ShootingMode():
     def __init__(self, screen, game):
         game.reset() # reset events and scoreboard
         if game.challenge == True:
-            print("")
             pygame.time.set_timer(game.events["END_CHALLENGE"], SETTINGS.CHALLENGE_TIME, True)
         self.screen = screen
         self.game = game
@@ -112,7 +111,6 @@ class ShootingMode():
         for target in self.targets:
             occupied.append(target.get_final_rect())
         return occupied
-
     
     def save_results(self):
         results = {
@@ -220,6 +218,7 @@ class Arcade(ShootingMode):
         super().__init__(screen, game)
 
     def load(self):
+        pygame.time.set_timer(self.game.events["ADD_TARGET"], 0)
         pygame.time.set_timer(self.game.events["ADD_TARGET"], int(1000/self.game.TARGET_SPAWNRATE))
         self.add_target()
 
