@@ -1,3 +1,4 @@
+from os import write
 import pygame
 from pygame import draw
 from appearance import lobby_bg_color, switch_filling_color, switch_toggle_outline
@@ -79,3 +80,44 @@ class Switch():
                 self.toggle()
                 self.callback(self.is_on())
 
+
+# Graph data ((time_1, value_1), (time_2, value_2)...) in Rect
+class Graph(pygame.Rect):
+    def __init__(self, screen, data, *args) -> None:
+        super().__init__(*args)
+        self.screen = screen
+        self.data = data
+    
+    def draw(self):
+        width = 5
+        # draw axes
+        pygame.draw.line(self.screen, (0, 0, 0), self.topleft, self.bottomleft, width)
+        pygame.draw.line(self.screen, (0, 0, 0), self.bottomleft, self.bottomright, width)
+        pygame.draw.line(self.screen, (0, 0, 155), (0, 300), (800, 300))
+        pygame.draw.line(self.screen, (155, 0, 0), (0, 400), (800, 400))
+        pygame.draw.line(self.screen, (255, 0, 0), (0, 500), (800, 500))
+        pygame.draw.line(self.screen, (0, 155, 0), (0, 600), (800, 600))
+        # draw data
+        prepared_data = self.get_normalized_data()
+        pygame.draw.lines(self.screen, (0, 0, 0), False, prepared_data, width)
+
+    # returns data according to rect size
+    def get_normalized_data(self):
+        sorted_data = sorted(self.data, key=lambda x: x[0])
+        # min_x_value = sorted_data[0][0]
+        # max_x_value = sorted_data[len(sorted_data)-1][0]
+        min_y_value = 0
+        max_y_value = max(sorted_data, key=lambda y: y[1])[1]
+        x_delta = self.width/(len(sorted_data)-1)
+        y_delta = self.height/(max_y_value - min_y_value)
+        print(self.top)
+        normalized_data = []
+        for i, (x, y) in enumerate(sorted_data):
+            #print(y*y_delta)
+            normalized_data.append((self.x+i*x_delta, self.bottom-y*y_delta))
+       
+        print(normalized_data)
+        return normalized_data
+
+
+# show only x values?
