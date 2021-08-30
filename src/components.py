@@ -1,7 +1,5 @@
-from os import write
 import pygame
-from pygame import draw
-from appearance import lobby_bg_color, switch_filling_color, switch_toggle_outline
+from appearance import default_font, lobby_bg_color, switch_filling_color, switch_toggle_outline
 
 
 # Button with an outline and a callback
@@ -86,38 +84,68 @@ class Graph(pygame.Rect):
     def __init__(self, screen, data, *args) -> None:
         super().__init__(*args)
         self.screen = screen
-        self.data = data
+        self.data = sorted(data, key=lambda x: x[0])
+        self.font_size = 15
+        self.font = pygame.freetype.Font(default_font, self.font_size)
     
     def draw(self):
-        width = 5
+        axes_width = 5
+        lines_width = 3
+        index_width = 2
+        indice_gap = 30
+        indice_margin = 20
+
         # draw axes
-        pygame.draw.line(self.screen, (0, 0, 0), self.topleft, self.bottomleft, width)
-        pygame.draw.line(self.screen, (0, 0, 0), self.bottomleft, self.bottomright, width)
-        pygame.draw.line(self.screen, (0, 0, 155), (0, 300), (800, 300))
-        pygame.draw.line(self.screen, (155, 0, 0), (0, 400), (800, 400))
-        pygame.draw.line(self.screen, (255, 0, 0), (0, 500), (800, 500))
-        pygame.draw.line(self.screen, (0, 155, 0), (0, 600), (800, 600))
-        # draw data
+        pygame.draw.line(self.screen, (0, 0, 0), self.topleft, self.bottomleft, axes_width)
+        pygame.draw.line(self.screen, (0, 0, 0), self.bottomleft, self.bottomright, axes_width)
+        # draw indicative lines
+        # pygame.draw.line(self.screen, (0, 0, 255), (0, 200), (800, 200))
+        # pygame.draw.line(self.screen, (0, 0, 155), (0, 300), (800, 300))
+        # pygame.draw.line(self.screen, (155, 0, 0), (0, 400), (800, 400))
+        # pygame.draw.line(self.screen, (255, 0, 0), (0, 500), (800, 500))
+        # draw indices
+        x_delta, y_delta = self.get_deltas()
+        for y_pos in range(0, self.height+1, indice_gap): # +1 to show most-upper (self.height) value
+            y_value = int(y_pos/y_delta)
+            y_screen_pos = self.y+self.height-y_pos
+            # draw index line
+            if y_pos != 0 and y_pos != self.height: # don't draw lines on edges
+                pygame.draw.line(self.screen, (0, 0, 0), (self.x-axes_width, y_screen_pos), (self.x+axes_width, y_screen_pos), index_width)
+            # draw text value
+            text_rect = self.font.get_rect(str(y_value), size=self.font_size) 
+            text_rect.midright = (self.x-indice_margin, y_screen_pos)
+            self.font.render_to(self.screen, text_rect, str(y_value), (0, 0, 0))
+        
+        for i, x_pos in enumerate(range(0, self.width+1, int(x_delta))):
+            x_value = self.data[i][0]
+            x_screen_pos = self.x+self.width-x_pos
+            # draw index line
+            if x_pos != 0 and x_pos != self.height: # don't draw lines on edges
+                pygame.draw.line(self.screen, (0, 0, 0), (x_screen_pos, self.y+self.width-axes_width), (x_screen_pos, self.y+self.width+axes_width), index_width)
+            # draw text value
+            text_rect = self.font.get_rect(str(x_value), size=self.font_size) 
+            text_rect.midtop = (x_screen_pos, self.y+self.height+indice_margin)
+            self.font.render_to(self.screen, text_rect, str(x_value), (0, 0, 0))
+
+        # get data to draw
         prepared_data = self.get_normalized_data()
-        pygame.draw.lines(self.screen, (0, 0, 0), False, prepared_data, width)
+        # draw data
+        pygame.draw.lines(self.screen, (0, 0, 0), False, prepared_data, lines_width)
+
+    # one graph unit (currently only y-axis) equals delta pixels
+    def get_deltas(self):
+        min_y_value = 0
+        max_y_value = max(self.data, key=lambda y: y[1])[1]
+        x_delta = self.width/(len(self.data)-1)
+        y_delta = self.height/(max_y_value - min_y_value)
+        return x_delta, y_delta
 
     # returns data according to rect size
     def get_normalized_data(self):
-        sorted_data = sorted(self.data, key=lambda x: x[0])
-        # min_x_value = sorted_data[0][0]
-        # max_x_value = sorted_data[len(sorted_data)-1][0]
-        min_y_value = 0
-        max_y_value = max(sorted_data, key=lambda y: y[1])[1]
-        x_delta = self.width/(len(sorted_data)-1)
-        y_delta = self.height/(max_y_value - min_y_value)
-        print(self.top)
+        x_delta, y_delta = self.get_deltas()
         normalized_data = []
-        for i, (x, y) in enumerate(sorted_data):
-            #print(y*y_delta)
+        for i, (x, y) in enumerate(self.data):
             normalized_data.append((self.x+i*x_delta, self.bottom-y*y_delta))
        
         print(normalized_data)
         return normalized_data
-
-
-# show only x values?

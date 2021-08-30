@@ -1,4 +1,5 @@
 import pygame
+import pygame.freetype
 import components
 from pygame.locals import (
     QUIT,
@@ -13,7 +14,7 @@ screen.fill((255, 255, 255))
 
 
 center = screen.get_rect().center
-graph = components.Graph(screen, ((100, 80), (125, 90), (110, 75)), (0, 0, 300, 300))
+graph = components.Graph(screen, ((100, 80), (125, 50), (110, 75), (131, 84), (134, 40), (130, 60)), (0, 0, 300, 300))
 graph.center = center
 graph.draw()
 
