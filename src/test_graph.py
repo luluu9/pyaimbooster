@@ -14,7 +14,7 @@ screen.fill((255, 255, 255))
 
 
 center = screen.get_rect().center
-graph = components.Graph(screen, ((100, 80), (125, 50), (110, 75), (131, 84), (134, 40), (130, 60)), (0, 0, 300, 300))
+graph = components.Graph(screen, (0, 0, 0), 15, ((100, 80), (125, 50), (110, 75), (131, 84), (134, 40), (130, 60)), (0, 0, 300, 300))
 graph.center = center
 graph.draw()
 

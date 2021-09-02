@@ -80,12 +80,14 @@ class Switch():
 
 
 # Graph data ((time_1, value_1), (time_2, value_2)...) in Rect
+# Indices are beyond rect
 class Graph(pygame.Rect):
-    def __init__(self, screen, data, *args) -> None:
+    def __init__(self, screen, color, font_size, data, *args) -> None:
         super().__init__(*args)
         self.screen = screen
         self.data = sorted(data, key=lambda x: x[0])
-        self.font_size = 15
+        self.color = color
+        self.font_size = font_size
         self.font = pygame.freetype.Font(default_font, self.font_size)
     
     def draw(self):
@@ -96,13 +98,9 @@ class Graph(pygame.Rect):
         indice_margin = 20
 
         # draw axes
-        pygame.draw.line(self.screen, (0, 0, 0), self.topleft, self.bottomleft, axes_width)
-        pygame.draw.line(self.screen, (0, 0, 0), self.bottomleft, self.bottomright, axes_width)
-        # draw indicative lines
-        # pygame.draw.line(self.screen, (0, 0, 255), (0, 200), (800, 200))
-        # pygame.draw.line(self.screen, (0, 0, 155), (0, 300), (800, 300))
-        # pygame.draw.line(self.screen, (155, 0, 0), (0, 400), (800, 400))
-        # pygame.draw.line(self.screen, (255, 0, 0), (0, 500), (800, 500))
+        pygame.draw.line(self.screen, self.color, self.topleft, self.bottomleft, axes_width)
+        pygame.draw.line(self.screen, self.color, self.bottomleft, self.bottomright, axes_width)
+
         # draw indices
         x_delta, y_delta = self.get_deltas()
         for y_pos in range(0, self.height+1, indice_gap): # +1 to show most-upper (self.height) value
@@ -110,27 +108,27 @@ class Graph(pygame.Rect):
             y_screen_pos = self.y+self.height-y_pos
             # draw index line
             if y_pos != 0 and y_pos != self.height: # don't draw lines on edges
-                pygame.draw.line(self.screen, (0, 0, 0), (self.x-axes_width, y_screen_pos), (self.x+axes_width, y_screen_pos), index_width)
+                pygame.draw.line(self.screen, self.color, (self.x-axes_width, y_screen_pos), (self.x+axes_width, y_screen_pos), index_width)
             # draw text value
             text_rect = self.font.get_rect(str(y_value), size=self.font_size) 
             text_rect.midright = (self.x-indice_margin, y_screen_pos)
-            self.font.render_to(self.screen, text_rect, str(y_value), (0, 0, 0))
+            self.font.render_to(self.screen, text_rect, str(y_value), self.color)
         
         for i, x_pos in enumerate(range(0, self.width+1, int(x_delta))):
             x_value = self.data[i][0]
             x_screen_pos = self.x+self.width-x_pos
             # draw index line
             if x_pos != 0 and x_pos != self.height: # don't draw lines on edges
-                pygame.draw.line(self.screen, (0, 0, 0), (x_screen_pos, self.y+self.width-axes_width), (x_screen_pos, self.y+self.width+axes_width), index_width)
+                pygame.draw.line(self.screen, self.color, (x_screen_pos, self.y+self.width-axes_width), (x_screen_pos, self.y+self.width+axes_width), index_width)
             # draw text value
             text_rect = self.font.get_rect(str(x_value), size=self.font_size) 
             text_rect.midtop = (x_screen_pos, self.y+self.height+indice_margin)
-            self.font.render_to(self.screen, text_rect, str(x_value), (0, 0, 0))
+            self.font.render_to(self.screen, text_rect, str(x_value), self.color)
 
         # get data to draw
         prepared_data = self.get_normalized_data()
         # draw data
-        pygame.draw.lines(self.screen, (0, 0, 0), False, prepared_data, lines_width)
+        pygame.draw.lines(self.screen, self.color, False, prepared_data, lines_width)
 
     # one graph unit (currently only y-axis) equals delta pixels
     def get_deltas(self):
@@ -146,6 +144,4 @@ class Graph(pygame.Rect):
         normalized_data = []
         for i, (x, y) in enumerate(self.data):
             normalized_data.append((self.x+i*x_delta, self.bottom-y*y_delta))
-       
-        print(normalized_data)
         return normalized_data
