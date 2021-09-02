@@ -91,6 +91,10 @@ class Graph(pygame.Rect):
         self.font = pygame.freetype.Font(SETTINGS.Appearance.default_font, self.font_size)
     
     def draw(self):
+        if len(self.data) < 2:
+            print("Not enough data to draw!")
+            return
+        
         axes_width = 5
         lines_width = 3
         index_width = 2
