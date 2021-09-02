@@ -11,6 +11,22 @@ class SpeedyFingersSettings():
         self.target_settings = {"max_radius": 50, "grow": False, "outline_margin": 4}
         self.targets_amount = 5
 
+class Appearance():
+    def __init__(self):
+        self.default_font = "src/fonts/no_continue.ttf"
+        self.background_color = (222, 222, 222)
+        self.outline_color = (0, 0, 0) 
+        self.filling_color = (255, 255, 255)
+        self.score_color = (74, 74, 74)
+        self.lobby_bg_color = self.background_color
+        self.lobby_color = self.score_color
+        self.lobby_fontsize = 40
+        self.summary_bg_color = self.background_color
+        self.summary_color = self.score_color
+        self.summary_fontsize = 30
+        self.switch_filling_color = (195, 195, 195)
+        self.switch_toggle_outline = (125, 125, 125)
+
 class AllSettings():
     def __init__(self):
         self.SCREEN_WIDTH = 800
@@ -20,5 +36,8 @@ class AllSettings():
         self.AWP = AWPSettings()
         self.Arcade = ArcadeSettings()
         self.SpeedyFingers = SpeedyFingersSettings()
+        self.Appearance = Appearance()
+
+ 
 
 SETTINGS = AllSettings()

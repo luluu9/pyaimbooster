@@ -4,7 +4,6 @@ import time
 import gamemodes
 from pygame.constants import USEREVENT
 from config import SETTINGS
-from appearance import (default_font, score_color)
 
 from pygame.locals import (
     QUIT,
@@ -20,7 +19,7 @@ class ScoreCounter():
         self.hits = 0
         self.all_targets = 0
         self.font_size = 30
-        self.font = pygame.freetype.Font(default_font, self.font_size)
+        self.font = pygame.freetype.Font(SETTINGS.Appearance.default_font, self.font_size)
         self.shoots = 0
         self.start_time = time.time()
         self.last_hit_time = None
@@ -30,7 +29,7 @@ class ScoreCounter():
         text = f"{self.hits}/{self.all_targets}"
         text_rect = self.font.get_rect(text, size=30) 
         text_rect.midtop = screen.get_rect().midtop
-        self.font.render_to(screen, text_rect, text, score_color)
+        self.font.render_to(screen, text_rect, text, SETTINGS.Appearance.score_color)
 
     def add_hit(self):
         self.hits += 1

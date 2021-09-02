@@ -1,6 +1,5 @@
 import pygame
-from pygame import draw
-from appearance import lobby_bg_color, switch_filling_color, switch_toggle_outline
+from config import SETTINGS
 
 
 # Button with an outline and a callback
@@ -41,8 +40,8 @@ class Switch():
         else:
             self.current_text = self.on_text
         # clear screen and draw
-        self.screen.fill(lobby_bg_color, self.switch_outline)
-        self.screen.fill(lobby_bg_color, self.text_rect)
+        self.screen.fill(SETTINGS.Appearance.lobby_bg_color, self.switch_outline)
+        self.screen.fill(SETTINGS.Appearance.lobby_bg_color, self.text_rect)
         self.draw()
 
     def is_on(self):
@@ -58,7 +57,7 @@ class Switch():
         # prepare rect for switch, move down and size down
         self.switch_rect = self.text_rect.move(0, self.text_rect.height*1.3).inflate(-self.text_rect.width/2, 0) 
         # fill switch with color
-        self.filling_rect = pygame.draw.rect(self.screen, switch_filling_color, self.switch_rect)
+        self.filling_rect = pygame.draw.rect(self.screen, SETTINGS.Appearance.switch_filling_color, self.switch_rect)
         # create outline for switch
         self.switch_outline = pygame.draw.rect(self.screen, self.text_color, self.switch_rect, outline)
         # prepare size and position for toggle
@@ -68,7 +67,7 @@ class Switch():
         else:
             self.toggle_position = (self.switch_rect.x+outline/1.5, self.switch_rect.y+outline)
         # create toggle rect
-        self.toggle_rect = pygame.draw.rect(self.screen, switch_toggle_outline, pygame.Rect(self.toggle_position, self.toggle_size), outline)
+        self.toggle_rect = pygame.draw.rect(self.screen, SETTINGS.Appearance.switch_toggle_outline, pygame.Rect(self.toggle_position, self.toggle_size), outline)
 
     def set_callback(self, callback):
         self.callback = callback
