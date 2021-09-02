@@ -88,7 +88,7 @@ class Graph(pygame.Rect):
         self.data = sorted(data, key=lambda x: x[0])
         self.color = color
         self.font_size = font_size
-        self.font = pygame.freetype.Font(default_font, self.font_size)
+        self.font = pygame.freetype.Font(SETTINGS.Appearance.default_font, self.font_size)
     
     def draw(self):
         axes_width = 5
