@@ -2,13 +2,13 @@ import pathlib
 import json
 import time
 
-# STATS STRUCTURE
+# RESULTS STRUCTURE
 # {
 #   GAMEMODE:
 #   {
 #       DATE:
 #       {
-#           STATS...      
+#           RESULTS...      
 #       }
 #   }
 #   ...
@@ -38,5 +38,16 @@ def add_results(gamemode, new_stats):
         results[gamemode] = {}
     results[gamemode][str(int(time.time()))] = new_stats
     write_history()
+
+# returns list of tuples which containts time and particular result values
+# e.g. for ("AWP", "Hits") returns (("12312425", "40"), ("12315425", "35"))
+def get_selected_results(gamemode, type):
+    selected_results = []
+    if gamemode in results:
+        for time, gamemode_results in results[gamemode].items():
+            if type in gamemode_results:
+                selected_results.append((time, gamemode_results[type]))
+    return selected_results
+
 
 results = read_history()
