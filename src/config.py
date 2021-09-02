@@ -26,6 +26,7 @@ class Appearance():
         self.summary_fontsize = 30
         self.switch_filling_color = (195, 195, 195)
         self.switch_toggle_outline = (125, 125, 125)
+        self.graph_fontsize = 10
 
 class AllSettings():
     def __init__(self):

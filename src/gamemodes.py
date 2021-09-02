@@ -2,7 +2,7 @@ import pygame
 import random
 import history
 from config import SETTINGS
-from components import Button, Switch
+from components import Button, Switch, Graph
 from sounds import (hit_sound, miss_sound)
 
 
@@ -208,6 +208,13 @@ class Summary(StaticButtons):
         play_button.set_callback(self.game.change_game_mode, self.previous_game_mode)
         return_button.set_callback(self.game.change_game_mode, "Lobby")
         self.buttons = (play_button, return_button)
+
+
+    def add_graph(self, result_type):
+        results_to_graph = history.get_selected_results(self.previous_game_mode, result_type)
+        graph = Graph(self.screen, SETTINGS.Appearance.summary_color, SETTINGS.Appearance.graph_fontsize, results_to_graph, (0, 0, 300, 300))
+        graph.center = self.screen.get_rect().center
+        graph.draw() 
 
 
 class Arcade(ShootingMode):
