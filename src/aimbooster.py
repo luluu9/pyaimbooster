@@ -128,7 +128,7 @@ while running:
             running = False
         elif event.type == KEYDOWN:
             # Go to summary
-            if event.key == K_s or event.key == K_ESCAPE:
+            if event.key == K_s or event.key == K_ESCAPE and game.game_mode != "Lobby":
                 # continue to prevent updating screen with targets after summary shows up
                 if game.game_mode != "Summary": # to prevent looping in summary
                     game.change_game_mode("Summary")
