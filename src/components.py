@@ -21,6 +21,21 @@ class Button():
             if self.button_rect.collidepoint(mouse_pos):
                 self.callback(*self.callback_args, **self.callback_kwargs)
 
+# Rect with possibility to call callback function
+class CallbackRect(pygame.Rect):
+    def __init__(self, *args):
+        super().__init__(*args)
+
+    def set_callback(self, callback, *args, **kwargs):
+        self.callback = callback
+        self.callback_args = args
+        self.callback_kwargs = kwargs
+
+    def check_click(self, mouse_pos):
+        if self.button_rect:
+            if self.button_rect.collidepoint(mouse_pos):
+                self.callback(*self.callback_args, **self.callback_kwargs)
+
 
 # Switch button with text change on toggle
 class Switch(): 
@@ -149,3 +164,46 @@ class Graph(pygame.Rect):
         for i, (x, y) in enumerate(self.data):
             normalized_data.append((self.x+i*x_delta, self.bottom-y*y_delta))
         return normalized_data
+
+
+# Changeable tabs container 
+class TabView(pygame.Rect):
+    def __init__(self, screen, bg_color, selected_tab_color, text_color, font_size, tab_labels, padding, *args) -> None:
+        super().__init__(*args)
+        self.screen = screen
+        self.bg_color = bg_color
+        self.selected_tab_color = selected_tab_color
+        self.text_color = text_color
+        self.font_size = font_size
+        self.font = pygame.freetype.Font(SETTINGS.Appearance.default_font, self.font_size)
+        self.tab_labels = tab_labels
+        self.tab_label_width = self.font.get_rect(max(self.tab_labels, key=len), size=self.font_size).width + padding*2
+        self.tab_label_height = font_size*2
+        self.selected_tab = tab_labels[0]
+    
+    def draw(self):
+        self.screen.fill(self.bg_color, self)
+
+        # draw tab buttons
+        tab_start_pos = [self.x, self.y]
+        for i, tab_label in enumerate(self.tab_labels):
+            tab_center = [tab_start_pos[0]+self.tab_label_width//2, 
+                          tab_start_pos[1]+self.tab_label_height//2+self.tab_label_height*i]
+            tab_rect = CallbackRect(0, 0, self.tab_label_width, self.tab_label_height)
+            tab_rect.center = tab_center
+            if tab_label == self.selected_tab:
+                self.screen.fill(self.selected_tab_color, tab_rect)
+            # draw seperating lines
+            if i != 0:
+                separating_line_x = tab_start_pos[0]
+                separating_line_y = tab_start_pos[1]+self.tab_label_height*i
+                pygame.draw.line(self.screen, (0, 0, 0), 
+                                (separating_line_x, separating_line_y), 
+                                (separating_line_x+self.tab_label_width, separating_line_y))
+            # draw text
+            text_rect = self.font.get_rect(tab_label, size=self.font_size) 
+            text_rect.center = tab_center
+            self.font.render_to(self.screen, text_rect, tab_label, self.text_color)
+
+
+        
