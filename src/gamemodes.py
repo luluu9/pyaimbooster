@@ -2,7 +2,7 @@ import pygame
 import random
 import history
 from config import SETTINGS
-from components import Button, Switch, Graph
+from components import Button, Switch, Graph, TabView
 from sounds import (hit_sound, miss_sound)
 
 
@@ -171,18 +171,21 @@ class Summary(StaticButtons):
         self.buttons = []
 
     def load(self):
-        def show_variable(text, var, pos):
-            var_text = f"{text}: {var}"
-            text_rect = font.get_rect(var_text, size=SETTINGS.Appearance.summary_fontsize) 
-            text_rect.topleft = pos.topleft
-            font.render_to(self.screen, text_rect, var_text, SETTINGS.Appearance.summary_color)
-
         # prepare
         self.screen.fill(SETTINGS.Appearance.summary_bg_color)
         font = pygame.freetype.Font(SETTINGS.Appearance.default_font, SETTINGS.Appearance.summary_fontsize)
-        gap = SETTINGS.Appearance.summary_fontsize * 1.5
-        hits_ratio = f"{self.scoreCounter.get_hits()}/{self.scoreCounter.get_all_targets()}"
-        response_time = f"{int(self.scoreCounter.get_median_reaction_time()*1000)} msec"
+
+        # create TabView
+        tabView = TabView(self.screen,
+                             SETTINGS.Appearance.tab_view_bg_color, 
+                             SETTINGS.Appearance.tab_selected_color,
+                             SETTINGS.Appearance.tab_font_color, 
+                             SETTINGS.Appearance.tab_fontsize, 
+                             ["Results", "Graphs"], [self.show_results, self.add_graph], 10, (0, 0, 600, 500))
+        tabView.center = self.screen.get_rect().center
+        tabView.draw()
+        print(tabView.buttons)
+        self.buttons.extend(tabView.buttons)
 
         # create buttons
         midbottom = self.screen.get_rect().midbottom 
@@ -198,19 +201,31 @@ class Summary(StaticButtons):
         return_button = Button(self.screen, font, "Return", SETTINGS.Appearance.summary_color, return_rect, button_padding, SETTINGS.Appearance.summary_color, 5)
 
         # show stats
-        start = pygame.Rect(play_rect.x, 150, 1, 1)
+        self.show_results()
+
+        # set up callbacks
+        play_button.set_callback(self.game.change_game_mode, self.previous_game_mode)
+        return_button.set_callback(self.game.change_game_mode, "Lobby")
+        self.buttons.extend([play_button, return_button])
+
+    def show_results(self):
+        def show_variable(text, var, pos):
+            var_text = f"{text}: {var}"
+            text_rect = font.get_rect(var_text, size=SETTINGS.Appearance.summary_fontsize) 
+            text_rect.topleft = pos.topleft
+            font.render_to(self.screen, text_rect, var_text, SETTINGS.Appearance.summary_color)
+
+        font = pygame.freetype.Font(SETTINGS.Appearance.default_font, SETTINGS.Appearance.summary_fontsize)
+        gap = SETTINGS.Appearance.summary_fontsize * 1.5
+        hits_ratio = f"{self.scoreCounter.get_hits()}/{self.scoreCounter.get_all_targets()}"
+        response_time = f"{int(self.scoreCounter.get_median_reaction_time()*1000)} msec"
+        start = pygame.Rect(200, 150, 1, 1)
         show_variable("Hits", hits_ratio, start.move(0, gap))
         show_variable("Accuracy", f"{self.scoreCounter.get_accuracy()}%", start)
         show_variable("Time", f"{self.scoreCounter.get_time()} s", start.move(0, gap*2))
         show_variable("M. response", response_time, start.move(0, gap*3))
 
-        # set up callbacks
-        play_button.set_callback(self.game.change_game_mode, self.previous_game_mode)
-        return_button.set_callback(self.game.change_game_mode, "Lobby")
-        self.buttons = (play_button, return_button)
-
-
-    def add_graph(self, result_type):
+    def add_graph(self, result_type="Hits"): # DELETE HITS
         results_to_graph = history.get_selected_results(self.previous_game_mode, result_type)
         graph = Graph(self.screen, SETTINGS.Appearance.summary_color, SETTINGS.Appearance.graph_fontsize, results_to_graph, (0, 0, 300, 300))
         graph.center = self.screen.get_rect().center
