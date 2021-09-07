@@ -205,5 +205,12 @@ class TabView(pygame.Rect):
             text_rect.center = tab_center
             self.font.render_to(self.screen, text_rect, tab_label, self.text_color)
 
+    # returns empty rect (without labels panel) inside TabView
+    def get_empty_rect(self):
+        empty_rect = pygame.Rect(self)
+        empty_rect.width -= self.tab_label_width
+        empty_rect.x += self.tab_label_width
+        return empty_rect
+
 
         
