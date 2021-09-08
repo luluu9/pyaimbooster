@@ -89,7 +89,7 @@ class StaticButtons():
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 for button in self.buttons:
-                    if button.check_click(pygame.mouse.get_pos()):
+                    if button.is_clicked(pygame.mouse.get_pos()):
                         break
 
 
@@ -255,7 +255,6 @@ class Summary(StaticButtons):
             previous_button.set_callback(self.previous_graph)
             next_button.set_callback(self.next_graph)
             self.buttons.extend([previous_button, next_button])
-            print(self.buttons)
 
             # draw graph
             graph = Graph(self.screen, SETTINGS.Appearance.summary_color, SETTINGS.Appearance.graph_fontsize, results_to_graph, (0, 0, 300, 300))

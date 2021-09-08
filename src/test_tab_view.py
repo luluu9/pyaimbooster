@@ -31,7 +31,7 @@ while True:
             break
         elif event.type == pygame.MOUSEBUTTONDOWN:
             for button in tabView.buttons:
-                button.check_click(pygame.mouse.get_pos())
+                button.is_clicked(pygame.mouse.get_pos())
     tabView.draw()
     graph.draw()
     pygame.display.update()

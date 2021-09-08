@@ -12,10 +12,11 @@ class CallbackRect(pygame.Rect):
         self.callback_args = args
         self.callback_kwargs = kwargs
 
-    def check_click(self, mouse_pos):
+    def is_clicked(self, mouse_pos):
         if self.collidepoint(mouse_pos):
             self.callback(*self.callback_args, **self.callback_kwargs)
-
+            return True
+        return False
 
 # Button with callback
 class Button(CallbackRect): 
@@ -85,11 +86,13 @@ class Switch():
     def set_callback(self, callback):
         self.callback = callback
 
-    def check_click(self, mouse_pos):
+    def is_clicked(self, mouse_pos):
         if self.switch_rect:
             if self.switch_rect.collidepoint(mouse_pos):
                 self.toggle()
                 self.callback(self.is_on())
+                return True
+        return False
 
 
 # Graph data ((time_1, value_1), (time_2, value_2)...) in Rect
