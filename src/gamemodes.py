@@ -177,6 +177,8 @@ class Summary(StaticButtons):
         self.font_size = SETTINGS.Appearance.summary_fontsize
         self.font = pygame.freetype.Font(SETTINGS.Appearance.default_font, self.font_size)
         self.buttons_padding = SETTINGS.Appearance.buttons_padding
+        self.next_button = None
+        self.previous_button = None
 
     def load(self):
         # prepare
@@ -238,23 +240,25 @@ class Summary(StaticButtons):
         self.tab_view.draw()
         results_to_graph = history.get_selected_results(self.previous_game_mode, self.current_graph_type)
         if len(results_to_graph) > 1:
+            if not self.previous_button:
+                previous_button_pos = self.tab_view.get_empty_rect().move(SETTINGS.Appearance.summary_padding, SETTINGS.Appearance.summary_padding)
+                previous_button_rect = self.font.get_rect("<", size=self.font_size) 
+                previous_button_rect.topleft = previous_button_pos.topleft
+                self.previous_button = Button(self.screen, self.font, "<", SETTINGS.Appearance.summary_color, self.buttons_padding, SETTINGS.Appearance.summary_color, 5, previous_button_rect)
+                self.previous_button.set_callback(self.previous_graph)
+                self.buttons.append(self.previous_button)
+
+            if not self.next_button:
+                next_button_pos = self.tab_view.get_empty_rect().move(self.tab_view.get_empty_rect().width-SETTINGS.Appearance.summary_padding, SETTINGS.Appearance.summary_padding)
+                next_button_rect = self.font.get_rect(">", size=self.font_size) 
+                next_button_rect.topright = next_button_pos.topleft
+                self.next_button = Button(self.screen, self.font, ">", SETTINGS.Appearance.summary_color, self.buttons_padding, SETTINGS.Appearance.summary_color, 5, next_button_rect)
+                self.next_button.set_callback(self.next_graph)
+                self.buttons.append(self.next_button)
+            
             # draw buttons
-            previous_button_pos = self.tab_view.get_empty_rect().move(SETTINGS.Appearance.summary_padding, SETTINGS.Appearance.summary_padding)
-            previous_button_rect = self.font.get_rect("<", size=self.font_size) 
-            previous_button_rect.topleft = previous_button_pos.topleft
-            previous_button = Button(self.screen, self.font, "<", SETTINGS.Appearance.summary_color, self.buttons_padding, SETTINGS.Appearance.summary_color, 5, previous_button_rect)
-            previous_button.draw()
-
-            next_button_pos = self.tab_view.get_empty_rect().move(self.tab_view.get_empty_rect().width-SETTINGS.Appearance.summary_padding, SETTINGS.Appearance.summary_padding)
-            next_button_rect = self.font.get_rect(">", size=self.font_size) 
-            next_button_rect.topright = next_button_pos.topleft
-            next_button = Button(self.screen, self.font, ">", SETTINGS.Appearance.summary_color, self.buttons_padding, SETTINGS.Appearance.summary_color, 5, next_button_rect)
-            next_button.draw()
-
-            # set callbacks
-            previous_button.set_callback(self.previous_graph)
-            next_button.set_callback(self.next_graph)
-            self.buttons.extend([previous_button, next_button])
+            self.next_button.draw()
+            self.previous_button.draw()
 
             # draw graph
             graph = Graph(self.screen, SETTINGS.Appearance.summary_color, SETTINGS.Appearance.graph_fontsize, results_to_graph, (0, 0, 300, 300))
@@ -264,7 +268,7 @@ class Summary(StaticButtons):
             # draw graph title
             title_rect = self.font.get_rect(self.current_graph_type, size=self.font_size)
             title_rect.center = self.tab_view.get_empty_rect().center
-            title_rect.y = next_button_rect.y # align graph title height to buttons
+            title_rect.y = self.next_button.text_rect.y # align graph title height to buttons text
             self.font.render_to(self.screen, title_rect, self.current_graph_type, SETTINGS.Appearance.summary_color)
         else:
             text = f"Not enough data for graph"
@@ -420,5 +424,5 @@ class AWP(ShootingMode):
 
 
 # TODO:
-# - prevent creating multiple buttons of same type (summary on tab/graph change)
+# - check why there are multiple unknown buttons in summary
 # - clean up mess
