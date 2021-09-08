@@ -413,6 +413,5 @@ class AWP(ShootingMode):
 
 # TODO:
 # - prevent creating multiple buttons of same type (summary on tab/graph change)
-# - stop timer when going to Summary
 # - improve buttons code
 # - clean up mess
