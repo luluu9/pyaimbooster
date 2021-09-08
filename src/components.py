@@ -181,7 +181,7 @@ class TabView(pygame.Rect):
         self.tab_label_width = self.font.get_rect(max(self.tab_labels, key=len), size=self.font_size).width + padding*2
         self.tab_label_height = font_size*2
         self.selected_tab = tab_labels[0]
-        self.buttons = []
+        self.tab_buttons = [] # needs to be manually checked by check_click method
     
     def draw(self):
         self.screen.fill(self.bg_color, self)
@@ -195,7 +195,7 @@ class TabView(pygame.Rect):
             tab_rect = CallbackRect(0, 0, self.tab_label_width, self.tab_label_height)
             tab_rect.center = tab_center
             tab_rect.set_callback(self.change_tab, tab_label)
-            self.buttons.append(tab_rect)
+            self.tab_buttons.append(tab_rect)
             if tab_label == self.selected_tab:
                 self.screen.fill(self.selected_tab_color, tab_rect)
             # draw seperating lines

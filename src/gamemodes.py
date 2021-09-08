@@ -184,8 +184,7 @@ class Summary(StaticButtons):
                              ["Results", "Graphs"], [self.show_results, self.add_graph], 10, (0, 0, 600, 500))
         tabView.center = self.screen.get_rect().center
         tabView.draw()
-        print(tabView.buttons)
-        self.buttons.extend(tabView.buttons)
+        self.buttons.extend(tabView.tab_buttons)
 
         # create buttons
         midbottom = self.screen.get_rect().midbottom 
