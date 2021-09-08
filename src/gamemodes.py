@@ -116,7 +116,7 @@ class ShootingMode():
             "Accuracy": self.scoreCounter.get_accuracy(),
             "Median response": self.scoreCounter.get_median_reaction_time()
         }
-        history.add_results(type(self).__name__, results)
+        history.add_results(self.game.game_mode, results)
 
 
 class Lobby(StaticButtons):
@@ -259,8 +259,10 @@ class Summary(StaticButtons):
             title_rect.y = next_button_rect.y # align graph title height to buttons
             self.font.render_to(self.screen, title_rect, self.current_graph_type, SETTINGS.Appearance.summary_color)
         else:
-            # Not enough data to graph (draw text about this)
-            pass
+            text = f"Not enough data for graph"
+            text_rect = self.font.get_rect(text, size=SETTINGS.Appearance.summary_fontsize)
+            text_rect.center = self.tab_view.get_empty_rect().center
+            self.font.render_to(self.screen, text_rect, text, SETTINGS.Appearance.summary_color)
         self.show_main_buttons()
     
     def next_graph(self):
