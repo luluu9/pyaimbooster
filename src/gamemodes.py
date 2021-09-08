@@ -181,13 +181,13 @@ class Summary(StaticButtons):
                              SETTINGS.Appearance.tab_selected_color,
                              SETTINGS.Appearance.tab_font_color, 
                              SETTINGS.Appearance.tab_fontsize, 
-                             ["Results", "Graphs"], [self.show_results, self.add_graph], 10, (0, 0, 600, 500))
+                             ["Results", "Graphs"], [self.show_results, self.show_graph], 10, (0, 0, 600, 500))
         self.tab_view.center = self.screen.get_rect().center
         self.tab_view.draw()
         self.buttons.extend(self.tab_view.tab_buttons)
 
         # create buttons
-        midbottom = self.screen.get_rect().midbottom 
+        midbottom = self.tab_view.midbottom 
         button_padding = 15
         play_rect = font.get_rect("Play again", size=SETTINGS.Appearance.summary_fontsize) 
         play_rect.midright = midbottom
@@ -218,13 +218,13 @@ class Summary(StaticButtons):
         gap = SETTINGS.Appearance.summary_fontsize * 1.5
         hits_ratio = f"{self.scoreCounter.get_hits()}/{self.scoreCounter.get_all_targets()}"
         response_time = f"{int(self.scoreCounter.get_median_reaction_time()*1000)} msec"
-        start = self.tab_view.get_empty_rect()
+        start = self.tab_view.get_empty_rect().move(SETTINGS.Appearance.summary_padding, SETTINGS.Appearance.summary_padding)
         show_variable("Hits", hits_ratio, start.move(0, gap))
         show_variable("Accuracy", f"{self.scoreCounter.get_accuracy()}%", start)
         show_variable("Time", f"{self.scoreCounter.get_time()} s", start.move(0, gap*2))
         show_variable("M. response", response_time, start.move(0, gap*3))
 
-    def add_graph(self, result_type="Hits"): # DELETE HITS
+    def show_graph(self, result_type="Hits"): # DELETE HITS
         results_to_graph = history.get_selected_results(self.previous_game_mode, result_type)
         graph = Graph(self.screen, SETTINGS.Appearance.summary_color, SETTINGS.Appearance.graph_fontsize, results_to_graph, (0, 0, 300, 300))
         graph.center = self.tab_view.get_empty_rect().center

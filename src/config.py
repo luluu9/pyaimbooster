@@ -24,6 +24,7 @@ class Appearance():
         self.summary_bg_color = self.background_color
         self.summary_color = self.score_color
         self.summary_fontsize = 30
+        self.summary_padding = 40
         self.switch_filling_color = (195, 195, 195)
         self.switch_toggle_outline = (125, 125, 125)
         self.graph_fontsize = 10
