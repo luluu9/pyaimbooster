@@ -2,7 +2,7 @@ import pygame
 import random
 import history
 from config import SETTINGS
-from components import Button, Switch, Graph
+from components import Button, Switch, Graph, TabView
 from sounds import (hit_sound, miss_sound)
 
 
@@ -89,7 +89,8 @@ class StaticButtons():
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 for button in self.buttons:
-                    button.check_click(pygame.mouse.get_pos())
+                    if button.check_click(pygame.mouse.get_pos()):
+                        break
 
 
 class ShootingMode():
@@ -115,7 +116,7 @@ class ShootingMode():
             "Accuracy": self.scoreCounter.get_accuracy(),
             "Median response": self.scoreCounter.get_median_reaction_time()
         }
-        history.add_results(type(self).__name__, results)
+        history.add_results(self.game.game_mode, results)
 
 
 class Lobby(StaticButtons):
@@ -167,54 +168,112 @@ class Summary(StaticButtons):
         self.screen = screen
         self.game = game
         self.scoreCounter = game.scoreCounter
-        self.previous_game_mode = game.game_mode
+        self.previous_game_mode = game.game_mode # change this name to more precise
         self.buttons = []
+        self.result_types = history.get_result_types(self.previous_game_mode)
+        self.current_graph_type = self.result_types[0] if self.result_types else ""
+        self.font = pygame.freetype.Font(SETTINGS.Appearance.default_font, SETTINGS.Appearance.summary_fontsize)
 
     def load(self):
-        def show_variable(text, var, pos):
-            var_text = f"{text}: {var}"
-            text_rect = font.get_rect(var_text, size=SETTINGS.Appearance.summary_fontsize) 
-            text_rect.topleft = pos.topleft
-            font.render_to(self.screen, text_rect, var_text, SETTINGS.Appearance.summary_color)
-
         # prepare
         self.screen.fill(SETTINGS.Appearance.summary_bg_color)
-        font = pygame.freetype.Font(SETTINGS.Appearance.default_font, SETTINGS.Appearance.summary_fontsize)
-        gap = SETTINGS.Appearance.summary_fontsize * 1.5
-        hits_ratio = f"{self.scoreCounter.get_hits()}/{self.scoreCounter.get_all_targets()}"
-        response_time = f"{int(self.scoreCounter.get_median_reaction_time()*1000)} msec"
-
-        # create buttons
-        midbottom = self.screen.get_rect().midbottom 
-        button_padding = 15
-        play_rect = font.get_rect("Play again", size=SETTINGS.Appearance.summary_fontsize) 
-        play_rect.midright = midbottom
-        play_rect.move_ip(-button_padding, -SETTINGS.Appearance.summary_fontsize) # to give some space between buttons
-        play_button = Button(self.screen, font, "Play again", SETTINGS.Appearance.summary_color, play_rect, button_padding, SETTINGS.Appearance.summary_color, 5)
         
-        return_rect = font.get_rect("Return", size=SETTINGS.Appearance.summary_fontsize) 
-        return_rect.midleft = midbottom
-        return_rect.move_ip(button_padding, -SETTINGS.Appearance.summary_fontsize)
-        return_button = Button(self.screen, font, "Return", SETTINGS.Appearance.summary_color, return_rect, button_padding, SETTINGS.Appearance.summary_color, 5)
+        # create TabView
+        self.tab_view = TabView(self.screen,
+                             SETTINGS.Appearance.tab_view_bg_color, 
+                             SETTINGS.Appearance.tab_selected_color,
+                             SETTINGS.Appearance.tab_font_color, 
+                             SETTINGS.Appearance.tab_fontsize, 
+                             ["Results", "Graphs"], [self.show_results, self.show_graph], 10, (0, 0, 600, 500))
+        self.tab_view.center = self.screen.get_rect().center
+        self.tab_view.draw()
+        self.buttons.extend(self.tab_view.tab_buttons)
 
         # show stats
-        start = pygame.Rect(play_rect.x, 150, 1, 1)
-        show_variable("Hits", hits_ratio, start.move(0, gap))
-        show_variable("Accuracy", f"{self.scoreCounter.get_accuracy()}%", start)
-        show_variable("Time", f"{self.scoreCounter.get_time()} s", start.move(0, gap*2))
-        show_variable("M. response", response_time, start.move(0, gap*3))
+        self.show_results()
+
+    def show_main_buttons(self):
+        # create buttons
+        midbottom = self.tab_view.midbottom 
+        button_padding = SETTINGS.Appearance.buttons_padding
+        play_rect = self.font.get_rect("Play again", size=SETTINGS.Appearance.summary_fontsize) 
+        play_rect.midright = midbottom
+        play_rect.move_ip(-button_padding, -SETTINGS.Appearance.summary_fontsize) # to give some space between buttons
+        play_button = Button(self.screen, self.font, "Play again", SETTINGS.Appearance.summary_color, play_rect, button_padding, SETTINGS.Appearance.summary_color, 5)
+        
+        return_rect = self.font.get_rect("Return", size=SETTINGS.Appearance.summary_fontsize) 
+        return_rect.midleft = midbottom
+        return_rect.move_ip(button_padding, -SETTINGS.Appearance.summary_fontsize)
+        return_button = Button(self.screen, self.font, "Return", SETTINGS.Appearance.summary_color, return_rect, button_padding, SETTINGS.Appearance.summary_color, 5)
 
         # set up callbacks
         play_button.set_callback(self.game.change_game_mode, self.previous_game_mode)
         return_button.set_callback(self.game.change_game_mode, "Lobby")
-        self.buttons = (play_button, return_button)
+        self.buttons.extend([play_button, return_button])
 
+    def show_results(self):
+        def show_variable(text, var, pos):
+            var_text = f"{text}: {var}"
+            text_rect = self.font.get_rect(var_text, size=SETTINGS.Appearance.summary_fontsize) 
+            text_rect.topleft = pos.topleft
+            self.font.render_to(self.screen, text_rect, var_text, SETTINGS.Appearance.summary_color)
 
-    def add_graph(self, result_type):
-        results_to_graph = history.get_selected_results(self.previous_game_mode, result_type)
-        graph = Graph(self.screen, SETTINGS.Appearance.summary_color, SETTINGS.Appearance.graph_fontsize, results_to_graph, (0, 0, 300, 300))
-        graph.center = self.screen.get_rect().center
-        graph.draw() 
+        gap = SETTINGS.Appearance.summary_fontsize * 1.5
+        hits_ratio = f"{self.scoreCounter.get_hits()}/{self.scoreCounter.get_all_targets()}"
+        response_time = f"{int(self.scoreCounter.get_median_reaction_time()*1000)} msec"
+        start = self.tab_view.get_empty_rect().move(SETTINGS.Appearance.summary_padding, SETTINGS.Appearance.summary_padding)
+        show_variable("Hits", hits_ratio, start.move(0, gap))
+        show_variable("Accuracy", f"{self.scoreCounter.get_accuracy()}%", start)
+        show_variable("Time", f"{self.scoreCounter.get_time()} s", start.move(0, gap*2))
+        show_variable("M. response", response_time, start.move(0, gap*3))
+        self.show_main_buttons()
+
+    def show_graph(self):
+        self.tab_view.draw()
+        results_to_graph = history.get_selected_results(self.previous_game_mode, self.current_graph_type)
+        if len(results_to_graph) > 1:
+            # draw buttons
+            previous_button_pos = self.tab_view.get_empty_rect().move(SETTINGS.Appearance.summary_padding, SETTINGS.Appearance.summary_padding)
+            previous_button_rect = self.font.get_rect("<", size=SETTINGS.Appearance.summary_fontsize) 
+            previous_button_rect.topleft = previous_button_pos.topleft
+            previous_button = Button(self.screen, self.font, "<", SETTINGS.Appearance.summary_color, previous_button_rect, SETTINGS.Appearance.buttons_padding, SETTINGS.Appearance.summary_color, 5)
+            
+            next_button_pos = self.tab_view.get_empty_rect().move(self.tab_view.get_empty_rect().width-SETTINGS.Appearance.summary_padding, SETTINGS.Appearance.summary_padding)
+            next_button_rect = self.font.get_rect(">", size=SETTINGS.Appearance.summary_fontsize) 
+            next_button_rect.topright = next_button_pos.topleft
+            next_button = Button(self.screen, self.font, ">", SETTINGS.Appearance.summary_color, next_button_rect, SETTINGS.Appearance.buttons_padding, SETTINGS.Appearance.summary_color, 5)
+    
+            # set callbacks
+            previous_button.set_callback(self.previous_graph)
+            next_button.set_callback(self.next_graph)
+            self.buttons.extend([previous_button, next_button])
+
+            # draw graph
+            graph = Graph(self.screen, SETTINGS.Appearance.summary_color, SETTINGS.Appearance.graph_fontsize, results_to_graph, (0, 0, 300, 300))
+            graph.center = self.tab_view.get_empty_rect().center
+            graph.draw()
+
+            # draw graph title
+            title_rect = self.font.get_rect(self.current_graph_type, size=SETTINGS.Appearance.summary_fontsize)
+            title_rect.center = self.tab_view.get_empty_rect().center
+            title_rect.y = next_button_rect.y # align graph title height to buttons
+            self.font.render_to(self.screen, title_rect, self.current_graph_type, SETTINGS.Appearance.summary_color)
+        else:
+            text = f"Not enough data for graph"
+            text_rect = self.font.get_rect(text, size=SETTINGS.Appearance.summary_fontsize)
+            text_rect.center = self.tab_view.get_empty_rect().center
+            self.font.render_to(self.screen, text_rect, text, SETTINGS.Appearance.summary_color)
+        self.show_main_buttons()
+    
+    def next_graph(self):
+        next_graph_type_index = (self.result_types.index(self.current_graph_type) + 1) % len(self.result_types)
+        self.current_graph_type = self.result_types[next_graph_type_index]
+        self.show_graph()
+
+    def previous_graph(self):
+        next_graph_type_index = (self.result_types.index(self.current_graph_type) - 1) % len(self.result_types)
+        self.current_graph_type = self.result_types[next_graph_type_index]
+        self.show_graph()
 
 
 class Arcade(ShootingMode):
@@ -350,3 +409,9 @@ class AWP(ShootingMode):
     def add_target(self):
         new_target = Target(self.screen, **SETTINGS.AWP.target_settings)
         self.targets.append(new_target)
+
+
+# TODO:
+# - prevent creating multiple buttons of same type (summary on tab/graph change)
+# - improve buttons code
+# - clean up mess

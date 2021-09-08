@@ -22,6 +22,7 @@ class ScoreCounter():
         self.font = pygame.freetype.Font(SETTINGS.Appearance.default_font, self.font_size)
         self.shoots = 0
         self.start_time = time.time()
+        self.end_time = None
         self.last_hit_time = None
         self.reaction_times = []
     
@@ -46,7 +47,9 @@ class ScoreCounter():
     
     # return how much time current round takes
     def get_time(self):
-        return round(time.time() - self.start_time, 2)
+        if not self.end_time:
+            self.end_time = time.time()
+        return round(self.end_time - self.start_time, 2)
     
     def get_accuracy(self):
         if self.shoots > 0:
@@ -153,4 +156,3 @@ pygame.quit()
 
 # todo:
 # - add training modes
-# - show history on graph
