@@ -2,7 +2,7 @@ import pygame
 import random
 import history
 from config import SETTINGS
-from components import Button, Button2, Switch, Graph, TabView
+from components import Button, Switch, Graph, TabView
 from sounds import (hit_sound, miss_sound)
 
 
@@ -132,7 +132,7 @@ class Lobby(StaticButtons):
         # prepare variables for buttons
         font = pygame.freetype.Font(SETTINGS.Appearance.default_font, SETTINGS.Appearance.lobby_fontsize)
         gap_betweens_buttons = SETTINGS.Appearance.lobby_fontsize * 1.3
-        buttons_padding = [SETTINGS.Appearance.buttons_padding]*2
+        buttons_padding = SETTINGS.Appearance.buttons_padding
         screen_center = self.screen.get_rect().center
         start_x = screen_center[0]
         start_y = screen_center[1] - (len(gamemodes)/2)*gap_betweens_buttons
@@ -146,7 +146,7 @@ class Lobby(StaticButtons):
             text_rect.center = (start_x, start_y + gap_betweens_buttons * i)
             
             # create and render button  
-            button = Button2(self.screen, font, gamemode, SETTINGS.Appearance.lobby_color, buttons_padding, SETTINGS.Appearance.lobby_color, 5, text_rect)
+            button = Button(self.screen, font, gamemode, SETTINGS.Appearance.lobby_color, buttons_padding, SETTINGS.Appearance.lobby_color, 5, text_rect)
             button.draw()
 
             # set callbacks to change game mode
@@ -174,7 +174,9 @@ class Summary(StaticButtons):
         self.buttons = []
         self.result_types = history.get_result_types(self.previous_game_mode)
         self.current_graph_type = self.result_types[0] if self.result_types else ""
-        self.font = pygame.freetype.Font(SETTINGS.Appearance.default_font, SETTINGS.Appearance.summary_fontsize)
+        self.font_size = SETTINGS.Appearance.summary_fontsize
+        self.font = pygame.freetype.Font(SETTINGS.Appearance.default_font, self.font_size)
+        self.buttons_padding = SETTINGS.Appearance.buttons_padding
 
     def load(self):
         # prepare
@@ -197,17 +199,19 @@ class Summary(StaticButtons):
     def show_main_buttons(self):
         # create buttons
         midbottom = self.tab_view.midbottom 
-        button_padding = SETTINGS.Appearance.buttons_padding
-        play_rect = self.font.get_rect("Play again", size=SETTINGS.Appearance.summary_fontsize) 
-        play_rect.midright = midbottom
-        play_rect.move_ip(-button_padding, -SETTINGS.Appearance.summary_fontsize) # to give some space between buttons
-        play_button = Button(self.screen, self.font, "Play again", SETTINGS.Appearance.summary_color, play_rect, button_padding, SETTINGS.Appearance.summary_color, 5)
         
-        return_rect = self.font.get_rect("Return", size=SETTINGS.Appearance.summary_fontsize) 
-        return_rect.midleft = midbottom
-        return_rect.move_ip(button_padding, -SETTINGS.Appearance.summary_fontsize)
-        return_button = Button(self.screen, self.font, "Return", SETTINGS.Appearance.summary_color, return_rect, button_padding, SETTINGS.Appearance.summary_color, 5)
+        play_rect = self.font.get_rect("Play again", size=self.font_size) 
+        play_rect.midright = midbottom
+        play_rect.move_ip(-self.buttons_padding[0], -self.font_size) # to give some space between buttons
+        play_button = Button(self.screen, self.font, "Play again", SETTINGS.Appearance.summary_color, self.buttons_padding, SETTINGS.Appearance.summary_color, 5, play_rect)
+        play_button.draw()
 
+        return_rect = self.font.get_rect("Return", size=self.font_size) 
+        return_rect.midleft = midbottom
+        return_rect.move_ip(self.buttons_padding[0], -self.font_size)
+        return_button = Button(self.screen, self.font, "Return", SETTINGS.Appearance.summary_color, self.buttons_padding, SETTINGS.Appearance.summary_color, 5, return_rect)
+        return_button.draw()
+        
         # set up callbacks
         play_button.set_callback(self.game.change_game_mode, self.previous_game_mode)
         return_button.set_callback(self.game.change_game_mode, "Lobby")
@@ -216,11 +220,11 @@ class Summary(StaticButtons):
     def show_results(self):
         def show_variable(text, var, pos):
             var_text = f"{text}: {var}"
-            text_rect = self.font.get_rect(var_text, size=SETTINGS.Appearance.summary_fontsize) 
+            text_rect = self.font.get_rect(var_text, size=self.font_size) 
             text_rect.topleft = pos.topleft
             self.font.render_to(self.screen, text_rect, var_text, SETTINGS.Appearance.summary_color)
 
-        gap = SETTINGS.Appearance.summary_fontsize * 1.5
+        gap = self.font_size * 1.5
         hits_ratio = f"{self.scoreCounter.get_hits()}/{self.scoreCounter.get_all_targets()}"
         response_time = f"{int(self.scoreCounter.get_median_reaction_time()*1000)} msec"
         start = self.tab_view.get_empty_rect().move(SETTINGS.Appearance.summary_padding, SETTINGS.Appearance.summary_padding)
@@ -236,19 +240,22 @@ class Summary(StaticButtons):
         if len(results_to_graph) > 1:
             # draw buttons
             previous_button_pos = self.tab_view.get_empty_rect().move(SETTINGS.Appearance.summary_padding, SETTINGS.Appearance.summary_padding)
-            previous_button_rect = self.font.get_rect("<", size=SETTINGS.Appearance.summary_fontsize) 
+            previous_button_rect = self.font.get_rect("<", size=self.font_size) 
             previous_button_rect.topleft = previous_button_pos.topleft
-            previous_button = Button(self.screen, self.font, "<", SETTINGS.Appearance.summary_color, previous_button_rect, SETTINGS.Appearance.buttons_padding, SETTINGS.Appearance.summary_color, 5)
-            
+            previous_button = Button(self.screen, self.font, "<", SETTINGS.Appearance.summary_color, self.buttons_padding, SETTINGS.Appearance.summary_color, 5, previous_button_rect)
+            previous_button.draw()
+
             next_button_pos = self.tab_view.get_empty_rect().move(self.tab_view.get_empty_rect().width-SETTINGS.Appearance.summary_padding, SETTINGS.Appearance.summary_padding)
-            next_button_rect = self.font.get_rect(">", size=SETTINGS.Appearance.summary_fontsize) 
+            next_button_rect = self.font.get_rect(">", size=self.font_size) 
             next_button_rect.topright = next_button_pos.topleft
-            next_button = Button(self.screen, self.font, ">", SETTINGS.Appearance.summary_color, next_button_rect, SETTINGS.Appearance.buttons_padding, SETTINGS.Appearance.summary_color, 5)
-    
+            next_button = Button(self.screen, self.font, ">", SETTINGS.Appearance.summary_color, self.buttons_padding, SETTINGS.Appearance.summary_color, 5, next_button_rect)
+            next_button.draw()
+
             # set callbacks
             previous_button.set_callback(self.previous_graph)
             next_button.set_callback(self.next_graph)
             self.buttons.extend([previous_button, next_button])
+            print(self.buttons)
 
             # draw graph
             graph = Graph(self.screen, SETTINGS.Appearance.summary_color, SETTINGS.Appearance.graph_fontsize, results_to_graph, (0, 0, 300, 300))
@@ -256,13 +263,13 @@ class Summary(StaticButtons):
             graph.draw()
 
             # draw graph title
-            title_rect = self.font.get_rect(self.current_graph_type, size=SETTINGS.Appearance.summary_fontsize)
+            title_rect = self.font.get_rect(self.current_graph_type, size=self.font_size)
             title_rect.center = self.tab_view.get_empty_rect().center
             title_rect.y = next_button_rect.y # align graph title height to buttons
             self.font.render_to(self.screen, title_rect, self.current_graph_type, SETTINGS.Appearance.summary_color)
         else:
             text = f"Not enough data for graph"
-            text_rect = self.font.get_rect(text, size=SETTINGS.Appearance.summary_fontsize)
+            text_rect = self.font.get_rect(text, size=self.font_size)
             text_rect.center = self.tab_view.get_empty_rect().center
             self.font.render_to(self.screen, text_rect, text, SETTINGS.Appearance.summary_color)
         self.show_main_buttons()

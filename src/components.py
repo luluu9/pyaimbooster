@@ -17,30 +17,8 @@ class CallbackRect(pygame.Rect):
             self.callback(*self.callback_args, **self.callback_kwargs)
 
 
-# Button with an outline and a callback
-class Button(): 
-    def __init__(self, screen, font, text, text_color, text_rect, padding=0, outline_color=(0,0,0), outline_radius=0, custom_outline_rect=None):
-        if custom_outline_rect:
-            self.button_rect = pygame.draw.rect(screen, outline_color, custom_outline_rect, outline_radius)
-        else:
-            self.button_rect = pygame.draw.rect(screen, outline_color, text_rect.inflate(padding, padding), outline_radius)
-        self.text_rect = font.render_to(screen, text_rect, text, text_color)
-
-    def set_callback(self, callback, *args, **kwargs):
-        self.callback = callback
-        self.callback_args = args
-        self.callback_kwargs = kwargs
-
-    def check_click(self, mouse_pos):
-        if self.button_rect:
-            if self.button_rect.collidepoint(mouse_pos):
-                self.callback(*self.callback_args, **self.callback_kwargs)
-                return True
-        return False
-
-
 # Button with callback
-class Button2(CallbackRect): 
+class Button(CallbackRect): 
     def __init__(self, screen, font, text, text_color, padding=(0, 0), outline_color=(0,0,0), outline_radius=0, *args):
         super().__init__(*args)
         self.screen = screen
@@ -50,10 +28,11 @@ class Button2(CallbackRect):
         self.padding = padding
         self.outline_color = outline_color
         self.outline_radius = outline_radius
+        self.inflate_ip(self.padding) # to detect click on padded area too
 
     def draw(self):
-        self.button_rect = pygame.draw.rect(self.screen, self.outline_color, self.inflate(self.padding), self.outline_radius)
-        self.text_rect = self.font.render_to(self.screen, self, self.text, self.text_color)
+        self.button_rect = pygame.draw.rect(self.screen, self.outline_color, self, self.outline_radius)
+        self.text_rect = self.font.render_to(self.screen, self.inflate([-p for p in self.padding]), self.text, self.text_color)
 
 
 # Switch button with text change on toggle

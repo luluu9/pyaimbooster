@@ -32,7 +32,7 @@ class Appearance():
         self.tab_selected_color = (165, 165, 165)
         self.tab_font_color = self.score_color
         self.tab_fontsize = 25
-        self.buttons_padding = 15
+        self.buttons_padding = [15, 15]
 
 class AllSettings():
     def __init__(self):
