@@ -167,6 +167,7 @@ class Graph(pygame.Rect):
 
 
 # Changeable tabs container 
+# tab_callbacks are designed for draw functions in empty area (get_empty_rect)
 class TabView(pygame.Rect):
     def __init__(self, screen, bg_color, selected_tab_color, text_color, font_size, tab_labels, tab_callbacks, padding, *args) -> None:
         super().__init__(*args)
@@ -214,6 +215,7 @@ class TabView(pygame.Rect):
         if tab_label in self.tab_labels:
             if tab_label != self.selected_tab:
                 self.selected_tab = tab_label
+                self.draw()
                 self.tab_callbacks[self.tab_labels.index(tab_label)]()
 
     # returns empty rect (without labels panel) inside TabView

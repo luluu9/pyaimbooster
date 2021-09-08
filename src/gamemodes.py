@@ -176,15 +176,15 @@ class Summary(StaticButtons):
         font = pygame.freetype.Font(SETTINGS.Appearance.default_font, SETTINGS.Appearance.summary_fontsize)
 
         # create TabView
-        tabView = TabView(self.screen,
+        self.tab_view = TabView(self.screen,
                              SETTINGS.Appearance.tab_view_bg_color, 
                              SETTINGS.Appearance.tab_selected_color,
                              SETTINGS.Appearance.tab_font_color, 
                              SETTINGS.Appearance.tab_fontsize, 
                              ["Results", "Graphs"], [self.show_results, self.add_graph], 10, (0, 0, 600, 500))
-        tabView.center = self.screen.get_rect().center
-        tabView.draw()
-        self.buttons.extend(tabView.tab_buttons)
+        self.tab_view.center = self.screen.get_rect().center
+        self.tab_view.draw()
+        self.buttons.extend(self.tab_view.tab_buttons)
 
         # create buttons
         midbottom = self.screen.get_rect().midbottom 
@@ -218,7 +218,7 @@ class Summary(StaticButtons):
         gap = SETTINGS.Appearance.summary_fontsize * 1.5
         hits_ratio = f"{self.scoreCounter.get_hits()}/{self.scoreCounter.get_all_targets()}"
         response_time = f"{int(self.scoreCounter.get_median_reaction_time()*1000)} msec"
-        start = pygame.Rect(200, 150, 1, 1)
+        start = self.tab_view.get_empty_rect()
         show_variable("Hits", hits_ratio, start.move(0, gap))
         show_variable("Accuracy", f"{self.scoreCounter.get_accuracy()}%", start)
         show_variable("Time", f"{self.scoreCounter.get_time()} s", start.move(0, gap*2))
@@ -227,8 +227,8 @@ class Summary(StaticButtons):
     def add_graph(self, result_type="Hits"): # DELETE HITS
         results_to_graph = history.get_selected_results(self.previous_game_mode, result_type)
         graph = Graph(self.screen, SETTINGS.Appearance.summary_color, SETTINGS.Appearance.graph_fontsize, results_to_graph, (0, 0, 300, 300))
-        graph.center = self.screen.get_rect().center
-        graph.draw() 
+        graph.center = self.tab_view.get_empty_rect().center
+        graph.draw()
 
 
 class Arcade(ShootingMode):
