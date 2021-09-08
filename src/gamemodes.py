@@ -172,13 +172,12 @@ class Summary(StaticButtons):
         self.buttons = []
         self.result_types = history.get_result_types(self.previous_game_mode)
         self.current_graph_type = self.result_types[0] if self.result_types else ""
-        print(self.result_types, self.current_graph_type)
+        self.font = pygame.freetype.Font(SETTINGS.Appearance.default_font, SETTINGS.Appearance.summary_fontsize)
 
     def load(self):
         # prepare
         self.screen.fill(SETTINGS.Appearance.summary_bg_color)
-        font = pygame.freetype.Font(SETTINGS.Appearance.default_font, SETTINGS.Appearance.summary_fontsize)
-
+        
         # create TabView
         self.tab_view = TabView(self.screen,
                              SETTINGS.Appearance.tab_view_bg_color, 
@@ -190,21 +189,22 @@ class Summary(StaticButtons):
         self.tab_view.draw()
         self.buttons.extend(self.tab_view.tab_buttons)
 
+        # show stats
+        self.show_results()
+
+    def show_main_buttons(self):
         # create buttons
         midbottom = self.tab_view.midbottom 
         button_padding = SETTINGS.Appearance.buttons_padding
-        play_rect = font.get_rect("Play again", size=SETTINGS.Appearance.summary_fontsize) 
+        play_rect = self.font.get_rect("Play again", size=SETTINGS.Appearance.summary_fontsize) 
         play_rect.midright = midbottom
         play_rect.move_ip(-button_padding, -SETTINGS.Appearance.summary_fontsize) # to give some space between buttons
-        play_button = Button(self.screen, font, "Play again", SETTINGS.Appearance.summary_color, play_rect, button_padding, SETTINGS.Appearance.summary_color, 5)
+        play_button = Button(self.screen, self.font, "Play again", SETTINGS.Appearance.summary_color, play_rect, button_padding, SETTINGS.Appearance.summary_color, 5)
         
-        return_rect = font.get_rect("Return", size=SETTINGS.Appearance.summary_fontsize) 
+        return_rect = self.font.get_rect("Return", size=SETTINGS.Appearance.summary_fontsize) 
         return_rect.midleft = midbottom
         return_rect.move_ip(button_padding, -SETTINGS.Appearance.summary_fontsize)
-        return_button = Button(self.screen, font, "Return", SETTINGS.Appearance.summary_color, return_rect, button_padding, SETTINGS.Appearance.summary_color, 5)
-
-        # show stats
-        self.show_results()
+        return_button = Button(self.screen, self.font, "Return", SETTINGS.Appearance.summary_color, return_rect, button_padding, SETTINGS.Appearance.summary_color, 5)
 
         # set up callbacks
         play_button.set_callback(self.game.change_game_mode, self.previous_game_mode)
@@ -214,11 +214,10 @@ class Summary(StaticButtons):
     def show_results(self):
         def show_variable(text, var, pos):
             var_text = f"{text}: {var}"
-            text_rect = font.get_rect(var_text, size=SETTINGS.Appearance.summary_fontsize) 
+            text_rect = self.font.get_rect(var_text, size=SETTINGS.Appearance.summary_fontsize) 
             text_rect.topleft = pos.topleft
-            font.render_to(self.screen, text_rect, var_text, SETTINGS.Appearance.summary_color)
+            self.font.render_to(self.screen, text_rect, var_text, SETTINGS.Appearance.summary_color)
 
-        font = pygame.freetype.Font(SETTINGS.Appearance.default_font, SETTINGS.Appearance.summary_fontsize)
         gap = SETTINGS.Appearance.summary_fontsize * 1.5
         hits_ratio = f"{self.scoreCounter.get_hits()}/{self.scoreCounter.get_all_targets()}"
         response_time = f"{int(self.scoreCounter.get_median_reaction_time()*1000)} msec"
@@ -227,22 +226,22 @@ class Summary(StaticButtons):
         show_variable("Accuracy", f"{self.scoreCounter.get_accuracy()}%", start)
         show_variable("Time", f"{self.scoreCounter.get_time()} s", start.move(0, gap*2))
         show_variable("M. response", response_time, start.move(0, gap*3))
+        self.show_main_buttons()
 
     def show_graph(self):
-        self.screen.fill(SETTINGS.Appearance.summary_bg_color, self.tab_view.get_empty_rect())
+        self.tab_view.draw()
         results_to_graph = history.get_selected_results(self.previous_game_mode, self.current_graph_type)
-        font = pygame.freetype.Font(SETTINGS.Appearance.default_font, SETTINGS.Appearance.summary_fontsize)
         if len(results_to_graph) > 1:
             # draw buttons
             previous_button_pos = self.tab_view.get_empty_rect().move(SETTINGS.Appearance.summary_padding, SETTINGS.Appearance.summary_padding)
-            previous_button_rect = font.get_rect("<", size=SETTINGS.Appearance.summary_fontsize) 
+            previous_button_rect = self.font.get_rect("<", size=SETTINGS.Appearance.summary_fontsize) 
             previous_button_rect.topleft = previous_button_pos.topleft
-            previous_button = Button(self.screen, font, "<", SETTINGS.Appearance.summary_color, previous_button_rect, SETTINGS.Appearance.buttons_padding, SETTINGS.Appearance.summary_color, 5)
+            previous_button = Button(self.screen, self.font, "<", SETTINGS.Appearance.summary_color, previous_button_rect, SETTINGS.Appearance.buttons_padding, SETTINGS.Appearance.summary_color, 5)
             
             next_button_pos = self.tab_view.get_empty_rect().move(self.tab_view.get_empty_rect().width-SETTINGS.Appearance.summary_padding, SETTINGS.Appearance.summary_padding)
-            next_button_rect = font.get_rect(">", size=SETTINGS.Appearance.summary_fontsize) 
+            next_button_rect = self.font.get_rect(">", size=SETTINGS.Appearance.summary_fontsize) 
             next_button_rect.topright = next_button_pos.topleft
-            next_button = Button(self.screen, font, ">", SETTINGS.Appearance.summary_color, next_button_rect, SETTINGS.Appearance.buttons_padding, SETTINGS.Appearance.summary_color, 5)
+            next_button = Button(self.screen, self.font, ">", SETTINGS.Appearance.summary_color, next_button_rect, SETTINGS.Appearance.buttons_padding, SETTINGS.Appearance.summary_color, 5)
     
             # set callbacks
             previous_button.set_callback(self.previous_graph)
@@ -255,13 +254,14 @@ class Summary(StaticButtons):
             graph.draw()
 
             # draw graph title
-            title_rect = font.get_rect(self.current_graph_type, size=SETTINGS.Appearance.summary_fontsize)
+            title_rect = self.font.get_rect(self.current_graph_type, size=SETTINGS.Appearance.summary_fontsize)
             title_rect.center = self.tab_view.get_empty_rect().center
             title_rect.y = next_button_rect.y # align graph title height to buttons
-            font.render_to(self.screen, title_rect, self.current_graph_type, SETTINGS.Appearance.summary_color)
+            self.font.render_to(self.screen, title_rect, self.current_graph_type, SETTINGS.Appearance.summary_color)
         else:
             # Not enough data to graph (draw text about this)
             pass
+        self.show_main_buttons()
     
     def next_graph(self):
         next_graph_type_index = (self.result_types.index(self.current_graph_type) + 1) % len(self.result_types)
@@ -410,5 +410,7 @@ class AWP(ShootingMode):
 
 
 # TODO:
-# - fix drawing over buttons in Summary
-# - think about tab view background when updating graph or something
+# - prevent creating multiple buttons of same type (summary on tab/graph change)
+# - stop timer when going to Summary
+# - improve buttons code
+# - clean up mess
