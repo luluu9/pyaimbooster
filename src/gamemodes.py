@@ -2,7 +2,7 @@ import pygame
 import random
 import history
 from config import SETTINGS
-from components import Button, Switch, Graph, TabView
+from components import Button, Button2, Switch, Graph, TabView
 from sounds import (hit_sound, miss_sound)
 
 
@@ -128,25 +128,27 @@ class Lobby(StaticButtons):
     def load(self):
         self.screen.fill(SETTINGS.Appearance.lobby_bg_color)
         gamemodes = ["Arcade", "Speedy fingers", "AWP"]
-        # prepare variables for text
+        
+        # prepare variables for buttons
         font = pygame.freetype.Font(SETTINGS.Appearance.default_font, SETTINGS.Appearance.lobby_fontsize)
-        gap = SETTINGS.Appearance.lobby_fontsize * 1.3
-        center = self.screen.get_rect().center
-        start = (center[0], center[1] - (len(gamemodes) * gap)/2)
+        gap_betweens_buttons = SETTINGS.Appearance.lobby_fontsize * 1.3
+        buttons_padding = [SETTINGS.Appearance.buttons_padding]*2
+        screen_center = self.screen.get_rect().center
+        start_x = screen_center[0]
+        start_y = screen_center[1] - (len(gamemodes)/2)*gap_betweens_buttons
+
         # find biggest rect to function as background rect
         biggest_rect = font.get_rect(max(gamemodes, key=len), size=SETTINGS.Appearance.lobby_fontsize)
+
         for i, gamemode in enumerate(gamemodes):
             # fit text rect
-            text_rect = font.get_rect(gamemode, size=SETTINGS.Appearance.lobby_fontsize) 
-            text_rect.center = (start[0], start[1] + gap * i)
-        
-            # prepare background for text
-            background_rect = pygame.Rect(start[0] - biggest_rect.w/2, text_rect.y, biggest_rect.w, biggest_rect.h)
-            background_rect = background_rect.inflate(15, 15) # make some space around
+            text_rect = biggest_rect 
+            text_rect.center = (start_x, start_y + gap_betweens_buttons * i)
             
             # create and render button  
-            button = Button(self.screen, font, gamemode, SETTINGS.Appearance.lobby_color, text_rect, outline_color=SETTINGS.Appearance.lobby_color, outline_radius=5, custom_outline_rect=background_rect)
-        
+            button = Button2(self.screen, font, gamemode, SETTINGS.Appearance.lobby_color, buttons_padding, SETTINGS.Appearance.lobby_color, 5, text_rect)
+            button.draw()
+
             # set callbacks to change game mode
             button.set_callback(self.game.change_game_mode, gamemode)
             self.buttons.append(button)
@@ -413,5 +415,4 @@ class AWP(ShootingMode):
 
 # TODO:
 # - prevent creating multiple buttons of same type (summary on tab/graph change)
-# - improve buttons code
 # - clean up mess

@@ -2,6 +2,21 @@ import pygame
 from config import SETTINGS
 
 
+# Rect with possibility to call callback function
+class CallbackRect(pygame.Rect):
+    def __init__(self, *args):
+        super().__init__(*args)
+
+    def set_callback(self, callback, *args, **kwargs):
+        self.callback = callback
+        self.callback_args = args
+        self.callback_kwargs = kwargs
+
+    def check_click(self, mouse_pos):
+        if self.collidepoint(mouse_pos):
+            self.callback(*self.callback_args, **self.callback_kwargs)
+
+
 # Button with an outline and a callback
 class Button(): 
     def __init__(self, screen, font, text, text_color, text_rect, padding=0, outline_color=(0,0,0), outline_radius=0, custom_outline_rect=None):
@@ -24,19 +39,21 @@ class Button():
         return False
 
 
-# Rect with possibility to call callback function
-class CallbackRect(pygame.Rect):
-    def __init__(self, *args):
+# Button with callback
+class Button2(CallbackRect): 
+    def __init__(self, screen, font, text, text_color, padding=(0, 0), outline_color=(0,0,0), outline_radius=0, *args):
         super().__init__(*args)
+        self.screen = screen
+        self.font = font
+        self.text = text
+        self.text_color = text_color
+        self.padding = padding
+        self.outline_color = outline_color
+        self.outline_radius = outline_radius
 
-    def set_callback(self, callback, *args, **kwargs):
-        self.callback = callback
-        self.callback_args = args
-        self.callback_kwargs = kwargs
-
-    def check_click(self, mouse_pos):
-        if self.collidepoint(mouse_pos):
-            self.callback(*self.callback_args, **self.callback_kwargs)
+    def draw(self):
+        self.button_rect = pygame.draw.rect(self.screen, self.outline_color, self.inflate(self.padding), self.outline_radius)
+        self.text_rect = self.font.render_to(self.screen, self, self.text, self.text_color)
 
 
 # Switch button with text change on toggle
