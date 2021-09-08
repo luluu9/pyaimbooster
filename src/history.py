@@ -49,5 +49,14 @@ def get_selected_results(gamemode, type):
                 selected_results.append((time, gamemode_results[type]))
     return selected_results
 
+def get_result_types(gamemode):
+    result_types = []
+    if gamemode in results:
+        for time, gamemode_results in results[gamemode].items():
+            for type in gamemode_results:
+                result_types.append(type)
+            break # we only need one iteration to get each of result type
+    return result_types
+
 
 results = read_history()

@@ -20,6 +20,8 @@ class Button():
         if self.button_rect:
             if self.button_rect.collidepoint(mouse_pos):
                 self.callback(*self.callback_args, **self.callback_kwargs)
+                return True
+        return False
 
 
 # Rect with possibility to call callback function

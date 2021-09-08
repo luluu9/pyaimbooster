@@ -27,11 +27,12 @@ class Appearance():
         self.summary_padding = 40
         self.switch_filling_color = (195, 195, 195)
         self.switch_toggle_outline = (125, 125, 125)
-        self.graph_fontsize = 10
+        self.graph_fontsize = 15
         self.tab_view_bg_color = (195, 195, 195) 
         self.tab_selected_color = (165, 165, 165)
         self.tab_font_color = self.score_color
         self.tab_fontsize = 25
+        self.buttons_padding = 15
 
 class AllSettings():
     def __init__(self):

@@ -89,7 +89,8 @@ class StaticButtons():
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 for button in self.buttons:
-                    button.check_click(pygame.mouse.get_pos())
+                    if button.check_click(pygame.mouse.get_pos()):
+                        break
 
 
 class ShootingMode():
@@ -167,8 +168,11 @@ class Summary(StaticButtons):
         self.screen = screen
         self.game = game
         self.scoreCounter = game.scoreCounter
-        self.previous_game_mode = game.game_mode
+        self.previous_game_mode = game.game_mode # change this name to more precise
         self.buttons = []
+        self.result_types = history.get_result_types(self.previous_game_mode)
+        self.current_graph_type = self.result_types[0] if self.result_types else ""
+        print(self.result_types, self.current_graph_type)
 
     def load(self):
         # prepare
@@ -188,7 +192,7 @@ class Summary(StaticButtons):
 
         # create buttons
         midbottom = self.tab_view.midbottom 
-        button_padding = 15
+        button_padding = SETTINGS.Appearance.buttons_padding
         play_rect = font.get_rect("Play again", size=SETTINGS.Appearance.summary_fontsize) 
         play_rect.midright = midbottom
         play_rect.move_ip(-button_padding, -SETTINGS.Appearance.summary_fontsize) # to give some space between buttons
@@ -224,11 +228,50 @@ class Summary(StaticButtons):
         show_variable("Time", f"{self.scoreCounter.get_time()} s", start.move(0, gap*2))
         show_variable("M. response", response_time, start.move(0, gap*3))
 
-    def show_graph(self, result_type="Hits"): # DELETE HITS
-        results_to_graph = history.get_selected_results(self.previous_game_mode, result_type)
-        graph = Graph(self.screen, SETTINGS.Appearance.summary_color, SETTINGS.Appearance.graph_fontsize, results_to_graph, (0, 0, 300, 300))
-        graph.center = self.tab_view.get_empty_rect().center
-        graph.draw()
+    def show_graph(self):
+        self.screen.fill(SETTINGS.Appearance.summary_bg_color, self.tab_view.get_empty_rect())
+        results_to_graph = history.get_selected_results(self.previous_game_mode, self.current_graph_type)
+        font = pygame.freetype.Font(SETTINGS.Appearance.default_font, SETTINGS.Appearance.summary_fontsize)
+        if len(results_to_graph) > 1:
+            # draw buttons
+            previous_button_pos = self.tab_view.get_empty_rect().move(SETTINGS.Appearance.summary_padding, SETTINGS.Appearance.summary_padding)
+            previous_button_rect = font.get_rect("<", size=SETTINGS.Appearance.summary_fontsize) 
+            previous_button_rect.topleft = previous_button_pos.topleft
+            previous_button = Button(self.screen, font, "<", SETTINGS.Appearance.summary_color, previous_button_rect, SETTINGS.Appearance.buttons_padding, SETTINGS.Appearance.summary_color, 5)
+            
+            next_button_pos = self.tab_view.get_empty_rect().move(self.tab_view.get_empty_rect().width-SETTINGS.Appearance.summary_padding, SETTINGS.Appearance.summary_padding)
+            next_button_rect = font.get_rect(">", size=SETTINGS.Appearance.summary_fontsize) 
+            next_button_rect.topright = next_button_pos.topleft
+            next_button = Button(self.screen, font, ">", SETTINGS.Appearance.summary_color, next_button_rect, SETTINGS.Appearance.buttons_padding, SETTINGS.Appearance.summary_color, 5)
+    
+            # set callbacks
+            previous_button.set_callback(self.previous_graph)
+            next_button.set_callback(self.next_graph)
+            self.buttons.extend([previous_button, next_button])
+
+            # draw graph
+            graph = Graph(self.screen, SETTINGS.Appearance.summary_color, SETTINGS.Appearance.graph_fontsize, results_to_graph, (0, 0, 300, 300))
+            graph.center = self.tab_view.get_empty_rect().center
+            graph.draw()
+
+            # draw graph title
+            title_rect = font.get_rect(self.current_graph_type, size=SETTINGS.Appearance.summary_fontsize)
+            title_rect.center = self.tab_view.get_empty_rect().center
+            title_rect.y = next_button_rect.y # align graph title height to buttons
+            font.render_to(self.screen, title_rect, self.current_graph_type, SETTINGS.Appearance.summary_color)
+        else:
+            # Not enough data to graph (draw text about this)
+            pass
+    
+    def next_graph(self):
+        next_graph_type_index = (self.result_types.index(self.current_graph_type) + 1) % len(self.result_types)
+        self.current_graph_type = self.result_types[next_graph_type_index]
+        self.show_graph()
+
+    def previous_graph(self):
+        next_graph_type_index = (self.result_types.index(self.current_graph_type) - 1) % len(self.result_types)
+        self.current_graph_type = self.result_types[next_graph_type_index]
+        self.show_graph()
 
 
 class Arcade(ShootingMode):
@@ -364,3 +407,8 @@ class AWP(ShootingMode):
     def add_target(self):
         new_target = Target(self.screen, **SETTINGS.AWP.target_settings)
         self.targets.append(new_target)
+
+
+# TODO:
+# - fix drawing over buttons in Summary
+# - think about tab view background when updating graph or something
