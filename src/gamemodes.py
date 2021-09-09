@@ -179,6 +179,8 @@ class Summary(StaticButtons):
         self.buttons_padding = SETTINGS.Appearance.buttons_padding
         self.next_button = None
         self.previous_button = None
+        self.play_again_button = None
+        self.return_button = None
 
     def load(self):
         # prepare
@@ -199,25 +201,23 @@ class Summary(StaticButtons):
         self.show_results()
 
     def show_main_buttons(self):
-        # create buttons
         midbottom = self.tab_view.midbottom 
-        
-        play_rect = self.font.get_rect("Play again", size=self.font_size) 
-        play_rect.midright = midbottom
-        play_rect.move_ip(-self.buttons_padding[0], -self.font_size) # to give some space between buttons
-        play_button = Button(self.screen, self.font, "Play again", SETTINGS.Appearance.summary_color, self.buttons_padding, SETTINGS.Appearance.summary_color, 5, play_rect)
-        play_button.draw()
-
-        return_rect = self.font.get_rect("Return", size=self.font_size) 
-        return_rect.midleft = midbottom
-        return_rect.move_ip(self.buttons_padding[0], -self.font_size)
-        return_button = Button(self.screen, self.font, "Return", SETTINGS.Appearance.summary_color, self.buttons_padding, SETTINGS.Appearance.summary_color, 5, return_rect)
-        return_button.draw()
-        
-        # set up callbacks
-        play_button.set_callback(self.game.change_game_mode, self.previous_game_mode)
-        return_button.set_callback(self.game.change_game_mode, "Lobby")
-        self.buttons.extend([play_button, return_button])
+        if not self.play_again_button:
+            play_rect = self.font.get_rect("Play again", size=self.font_size) 
+            play_rect.midright = midbottom
+            play_rect.move_ip(-self.buttons_padding[0], -self.font_size) # to give some space between buttons
+            self.play_again_button = Button(self.screen, self.font, "Play again", SETTINGS.Appearance.summary_color, self.buttons_padding, SETTINGS.Appearance.summary_color, 5, play_rect)
+            self.play_again_button.set_callback(self.game.change_game_mode, self.previous_game_mode)
+            self.buttons.append(self.play_again_button)
+        if not self.return_button:
+            return_rect = self.font.get_rect("Return", size=self.font_size) 
+            return_rect.midleft = midbottom
+            return_rect.move_ip(self.buttons_padding[0], -self.font_size)
+            self.return_button = Button(self.screen, self.font, "Return", SETTINGS.Appearance.summary_color, self.buttons_padding, SETTINGS.Appearance.summary_color, 5, return_rect)
+            self.return_button.set_callback(self.game.change_game_mode, "Lobby")
+            self.buttons.append(self.return_button)
+        self.play_again_button.draw()
+        self.return_button.draw()
 
     def show_results(self):
         def show_variable(text, var, pos):
