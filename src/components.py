@@ -18,6 +18,7 @@ class CallbackRect(pygame.Rect):
             return True
         return False
 
+
 # Button with callback
 class Button(CallbackRect): 
     def __init__(self, screen, font, text, text_color, padding=(0, 0), outline_color=(0,0,0), outline_radius=0, *args):
