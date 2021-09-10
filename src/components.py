@@ -282,3 +282,7 @@ class Slider(CallbackRect):
         max_value_rect = self.font.get_rect(max_text, size=self.font_size) 
         max_value_rect.topright = (self.right, text_y)
         self.font.render_to(self.screen, max_value_rect, max_text, self.text_color)
+    
+    def check_slider(self):
+        if pygame.mouse.get_pressed(num_buttons=3)[0] == True:
+            self.is_clicked(pygame.mouse.get_pos())

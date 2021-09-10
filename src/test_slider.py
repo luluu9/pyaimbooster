@@ -20,8 +20,7 @@ while True:
     for event in pygame.event.get():
         if event.type == QUIT:
             break
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            slider.is_clicked(pygame.mouse.get_pos())
+    slider.check_slider()
     screen.fill(SETTINGS.Appearance.background_color)
     slider.draw()
     pygame.display.update()
