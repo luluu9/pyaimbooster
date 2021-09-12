@@ -299,6 +299,7 @@ class Settings(StaticButtons):
         self.buttons_font_size = SETTINGS.Appearance.settings_buttons_fontsize
         self.buttons_padding = SETTINGS.Appearance.buttons_padding
         self.return_button = None
+        self.sliders = []
 
     def load(self):
         # prepare
@@ -337,9 +338,10 @@ class Settings(StaticButtons):
             text_rect.center = pos
             self.font.render_to(self.screen, text_rect, var_text, SETTINGS.Appearance.summary_color)
             slider_font = pygame.freetype.Font(SETTINGS.Appearance.default_font, self.slider_font_size)
-            slider = Slider(self.screen, slider_font, SETTINGS.Appearance.summary_color, self.slider_font_size, SETTINGS.Appearance.summary_color, min_value, max_value, current_value, 5, 5, SETTINGS.Appearance.background_color, (0, 0), (150, 20))
+            slider = Slider(self.screen, SETTINGS.Appearance.tab_view_bg_color, slider_font, SETTINGS.Appearance.summary_color, self.slider_font_size, SETTINGS.Appearance.summary_color, min_value, max_value, current_value, 5, 5, SETTINGS.Appearance.background_color, (0, 0), (150, 20))
             slider.center = (pos[0], pos[1]+self.font_size*1.5)
             slider.draw()
+            self.sliders.append(slider)
 
         gap = self.font_size * 4
         current_pos = self.tab_view.get_empty_rect().midtop
@@ -352,6 +354,13 @@ class Settings(StaticButtons):
             show_variable(setting_name, value, min_value, max_value, current_pos)
         
         self.show_main_buttons()
+
+
+    def frame(self):
+        super().frame()
+        for slider in self.sliders:
+            slider.check_slider()
+            #slider.draw_slider_button()
 
 
 class Arcade(ShootingMode):
@@ -486,4 +495,4 @@ class AWP(ShootingMode):
 
     def add_target(self):
         new_target = Target(self.screen, **SETTINGS.AWP.get_target_settings())
-        self.targets.append(new_target)
+        self.targets.append(new_target) 
