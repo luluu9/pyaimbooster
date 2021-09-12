@@ -2,7 +2,8 @@ TargetLimits = {
                "max_radius": [1, 100],
                "grow": [0, 1], # ???
                "outline_margin": [0, 10],
-               "targets_amount": [1, 25]
+               "targets_amount": [1, 25],
+               "spawn_rate": [1, 10]
                } 
 
 class TargetSettings():
@@ -28,6 +29,7 @@ class ArcadeSettings(TargetSettings):
         self.max_radius = 50
         self.grow = 1 # 1 == True
         self.outline_margin = 4
+        self.spawn_rate = 3 # targets per second 
 
 class SpeedyFingersSettings(TargetSettings):
     def __init__(self):

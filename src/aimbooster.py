@@ -121,9 +121,6 @@ game = Game()
 game.events["ADD_TARGET"] = USEREVENT + 1
 game.events["END_CHALLENGE"] = USEREVENT + 2
 
-# GAME MECHANICS
-game.TARGET_SPAWNRATE = 3 # targets per second 
-
 # MAINLOOP
 running = True
 while running:

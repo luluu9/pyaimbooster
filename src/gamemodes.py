@@ -378,7 +378,7 @@ class Arcade(ShootingMode):
 
     def load(self):
         pygame.time.set_timer(self.game.events["ADD_TARGET"], 0)
-        pygame.time.set_timer(self.game.events["ADD_TARGET"], int(1000/self.game.TARGET_SPAWNRATE))
+        pygame.time.set_timer(self.game.events["ADD_TARGET"], int(1000/SETTINGS.Arcade.spawn_rate))
         self.add_target()
 
     def frame(self):
