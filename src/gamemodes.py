@@ -338,8 +338,14 @@ class Settings(StaticButtons):
             text_rect.center = pos
             self.font.render_to(self.screen, text_rect, var_text, SETTINGS.Appearance.summary_color)
             slider_font = pygame.freetype.Font(SETTINGS.Appearance.default_font, self.slider_font_size)
-            slider = Slider(self.screen, SETTINGS.Appearance.tab_view_bg_color, slider_font, SETTINGS.Appearance.summary_color, self.slider_font_size, SETTINGS.Appearance.summary_color, min_value, max_value, current_value, 5, 5, SETTINGS.Appearance.background_color, (0, 0), (150, 20))
+            slider = Slider(self.screen, SETTINGS.Appearance.tab_view_bg_color, 
+                            slider_font, SETTINGS.Appearance.summary_color, 
+                            self.slider_font_size, SETTINGS.Appearance.summary_color, 
+                            min_value, max_value, current_value, 5, 5, 
+                            SETTINGS.Appearance.background_color, 
+                            (0, 0), (150, 20))
             slider.center = (pos[0], pos[1]+self.font_size*1.5)
+            slider.set_call_on_change(self.change_setting, setting_name)
             slider.draw()
             self.sliders.append(slider)
 
@@ -354,7 +360,10 @@ class Settings(StaticButtons):
             show_variable(setting_name, value, min_value, max_value, current_pos)
         
         self.show_main_buttons()
-
+    
+    def change_setting(self, value, setting_name):
+        game_mode_settings = getattr(SETTINGS, self.tab_view.selected_tab)
+        setattr(game_mode_settings, setting_name, value) # how to show updated value?
 
     def frame(self):
         super().frame()

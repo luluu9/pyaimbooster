@@ -248,13 +248,19 @@ class Slider(CallbackRect):
         self.outline_radius = line_width
         self.set_callback(self.update_slider_position)
 
+    def set_call_on_change(self, call_on_change, *args, **kwargs):
+        self.call_on_change = call_on_change
+        self.call_on_change_args = args
+        self.call_on_change_kwargs = kwargs
+
     def get_slider_position(self):
         slider_position = self.x+self.width/(self.max_value-self.min_value)*self.current_value
         return slider_position
 
     def update_slider_position(self):
         mouse_pos_x = pygame.mouse.get_pos()[0]
-        self.current_value = (mouse_pos_x-self.x)*(self.max_value-self.min_value)/self.width
+        self.current_value = round((mouse_pos_x-self.x)*(self.max_value-self.min_value)/self.width)
+        self.call_on_change(self.current_value, *self.call_on_change_args, **self.call_on_change_kwargs)
         self.clear()
         self.draw()
     
