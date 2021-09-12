@@ -19,7 +19,7 @@ from sounds import (hit_sound, miss_sound)
 
 
 class Target():
-    def __init__(self, screen, grow=False, max_radius=50, outline_margin=4, forbidden_rects=[]):
+    def __init__(self, screen, grow=0, max_radius=50, outline_margin=4, forbidden_rects=[]):
         self.radius = 0
         self.screen = screen
         self.forbidden_rects = forbidden_rects
@@ -505,3 +505,8 @@ class AWP(ShootingMode):
     def add_target(self):
         new_target = Target(self.screen, **SETTINGS.AWP.get_target_settings())
         self.targets.append(new_target) 
+
+
+# TO INSPECT:
+# - still something is bad about respawn in arcade mode
+# - sometimes challenge mode time is bad (ends too fast) probably due to exiting from challenge mode earlier

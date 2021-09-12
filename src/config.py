@@ -20,19 +20,19 @@ class TargetSettings():
 class AWPSettings(TargetSettings):
     def __init__(self):
         self.max_radius = 10
-        self.grow = False
+        self.grow = 0
         self.outline_margin = 2
 
 class ArcadeSettings(TargetSettings):
     def __init__(self):
         self.max_radius = 50
-        self.grow = True
+        self.grow = 1 # 1 == True
         self.outline_margin = 4
 
 class SpeedyFingersSettings(TargetSettings):
     def __init__(self):
         self.max_radius = 50
-        self.grow = False
+        self.grow = 0
         self.outline_margin = 4
         self.targets_amount = 5
 
