@@ -1,14 +1,32 @@
-class AWPSettings():
-    def __init__(self):
-        self.target_settings = {"max_radius": 10, "grow": False, "outline_margin": 2}
+class TargetSettings():
+    def get_target_setting(self, attr_name):
+        try:
+            return getattr(self, attr_name)
+        except AttributeError:
+            return None
 
-class ArcadeSettings():
-    def __init__(self):
-        self.target_settings = {"max_radius": 50, "grow": True, "outline_margin": 4}
+    def get_target_settings(self):
+        target_settings_names = ["max_radius", "grow", "outline_margin"]
+        target_settings = {name:self.get_target_setting(name) for name in target_settings_names if self.get_target_setting(name) != None}
+        return target_settings
 
-class SpeedyFingersSettings():
+class AWPSettings(TargetSettings):
     def __init__(self):
-        self.target_settings = {"max_radius": 50, "grow": False, "outline_margin": 4}
+        self.max_radius = 10
+        self.grow = False
+        self.outline_margin = 2
+
+class ArcadeSettings(TargetSettings):
+    def __init__(self):
+        self.max_radius = 50
+        self.grow = True
+        self.outline_margin = 4
+
+class SpeedyFingersSettings(TargetSettings):
+    def __init__(self):
+        self.max_radius = 50
+        self.grow = False
+        self.outline_margin = 4
         self.targets_amount = 5
 
 class Appearance():

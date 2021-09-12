@@ -330,7 +330,7 @@ class Arcade(ShootingMode):
         self.scoreCounter.update()
     
     def add_target(self):
-        new_target = Target(self.screen, **SETTINGS.Arcade.target_settings, forbidden_rects=self.get_occupied_rects())
+        new_target = Target(self.screen, **SETTINGS.Arcade.get_target_settings(), forbidden_rects=self.get_occupied_rects())
         self.targets.append(new_target)
 
 
@@ -375,7 +375,7 @@ class SpeedyFingers(ShootingMode):
         self.scoreCounter.update()
 
     def add_target(self):
-        new_target = Target(self.screen, **SETTINGS.SpeedyFingers.target_settings, forbidden_rects=self.get_occupied_rects())
+        new_target = Target(self.screen, **SETTINGS.SpeedyFingers.get_target_settings(), forbidden_rects=self.get_occupied_rects())
         self.targets.append(new_target)
 
 
@@ -419,7 +419,7 @@ class AWP(ShootingMode):
         self.scoreCounter.update()
 
     def add_target(self):
-        new_target = Target(self.screen, **SETTINGS.AWP.target_settings)
+        new_target = Target(self.screen, **SETTINGS.AWP.get_target_settings())
         self.targets.append(new_target)
 
 
