@@ -82,6 +82,8 @@ class Game():
     def change_game_mode(self, game_mode):
         if game_mode == "Lobby":
             self.game_mode_obj = gamemodes.Lobby(screen, self)
+        elif game_mode == "Settings":
+            self.game_mode_obj = gamemodes.Settings(screen, self)
         elif game_mode == "Summary":
             self.game_mode_obj = gamemodes.Summary(screen, self)
         elif game_mode == "Arcade":

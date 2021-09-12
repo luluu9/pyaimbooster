@@ -1,3 +1,10 @@
+TargetLimits = {
+               "max_radius": [1, 100],
+               "grow": [0, 1], # ???
+               "outline_margin": [0, 10],
+               "targets_amount": [1, 25]
+               } 
+
 class TargetSettings():
     def get_target_setting(self, attr_name):
         try:
@@ -51,6 +58,9 @@ class Appearance():
         self.tab_font_color = self.score_color
         self.tab_fontsize = 25
         self.buttons_padding = [15, 15]
+        self.settings_fontsize = 20
+        self.settings_buttons_fontsize = self.summary_fontsize
+        self.slider_fontsize = 15
 
 class AllSettings():
     def __init__(self):
@@ -62,6 +72,7 @@ class AllSettings():
         self.Arcade = ArcadeSettings()
         self.SpeedyFingers = SpeedyFingersSettings()
         self.Appearance = Appearance()
+        self.TargetLimits = TargetLimits
 
 
 SETTINGS = AllSettings()

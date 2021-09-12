@@ -2,7 +2,7 @@ import pygame
 import random
 import history
 from config import SETTINGS
-from components import Button, Switch, Graph, TabView
+from components import Button, Switch, Graph, TabView, Slider
 from sounds import (hit_sound, miss_sound)
 
 
@@ -127,7 +127,7 @@ class Lobby(StaticButtons):
 
     def load(self):
         self.screen.fill(SETTINGS.Appearance.lobby_bg_color)
-        gamemodes = ["Arcade", "Speedy fingers", "AWP"]
+        gamemodes = ["Arcade", "Speedy fingers", "AWP", "Settings"]
         
         # prepare variables for buttons
         font = pygame.freetype.Font(SETTINGS.Appearance.default_font, SETTINGS.Appearance.lobby_fontsize)
@@ -288,6 +288,72 @@ class Summary(StaticButtons):
         self.show_graph()
 
 
+class Settings(StaticButtons):
+    def __init__(self, screen, game):
+        self.screen = screen
+        self.game = game
+        self.buttons = []
+        self.font_size = SETTINGS.Appearance.settings_fontsize
+        self.font = pygame.freetype.Font(SETTINGS.Appearance.default_font, self.font_size)
+        self.slider_font_size = SETTINGS.Appearance.slider_fontsize
+        self.buttons_font_size = SETTINGS.Appearance.settings_buttons_fontsize
+        self.buttons_padding = SETTINGS.Appearance.buttons_padding
+        self.return_button = None
+
+    def load(self):
+        # prepare
+        self.screen.fill(SETTINGS.Appearance.summary_bg_color)
+        
+        # create TabView
+        self.tab_view = TabView(self.screen,
+                             SETTINGS.Appearance.tab_view_bg_color, 
+                             SETTINGS.Appearance.tab_selected_color,
+                             SETTINGS.Appearance.tab_font_color, 
+                             SETTINGS.Appearance.tab_fontsize, 
+                             ["Arcade", "SpeedyFingers", "AWP"], [self.show_settings]*3, 10, (0, 0, 600, 500))
+        self.tab_view.center = self.screen.get_rect().center
+        self.tab_view.draw()
+        self.buttons.extend(self.tab_view.tab_buttons)
+
+        # show stats
+        self.show_settings()
+
+    def show_main_buttons(self):
+        midbottom = self.tab_view.midbottom 
+        button_font = pygame.freetype.Font(SETTINGS.Appearance.default_font, self.buttons_font_size)
+        if not self.return_button:
+            return_rect = self.font.get_rect("Return", size=self.buttons_font_size) 
+            return_rect.center = midbottom
+            return_rect.move_ip(0, -self.buttons_font_size)
+            self.return_button = Button(self.screen, button_font, "Return", SETTINGS.Appearance.summary_color, self.buttons_padding, SETTINGS.Appearance.summary_color, 5, return_rect)
+            self.return_button.set_callback(self.game.change_game_mode, "Lobby")
+            self.buttons.append(self.return_button)
+        self.return_button.draw()
+
+    def show_settings(self):
+        def show_variable(text, current_value, min_value, max_value, pos):
+            var_text = f"{text}: {current_value}"
+            text_rect = self.font.get_rect(var_text, size=self.font_size) 
+            text_rect.center = pos
+            self.font.render_to(self.screen, text_rect, var_text, SETTINGS.Appearance.summary_color)
+            slider_font = pygame.freetype.Font(SETTINGS.Appearance.default_font, self.slider_font_size)
+            slider = Slider(self.screen, slider_font, SETTINGS.Appearance.summary_color, self.slider_font_size, SETTINGS.Appearance.summary_color, min_value, max_value, current_value, 5, 5, SETTINGS.Appearance.background_color, (0, 0), (150, 20))
+            slider.center = (pos[0], pos[1]+self.font_size*1.5)
+            slider.draw()
+
+        gap = self.font_size * 4
+        current_pos = self.tab_view.get_empty_rect().midtop
+        current_pos = (current_pos[0], current_pos[1]-gap//2)
+        selected_game_mode = self.tab_view.selected_tab
+        for setting_name, value in vars(getattr(SETTINGS, selected_game_mode)).items():
+            min_value = SETTINGS.TargetLimits[setting_name][0]
+            max_value = SETTINGS.TargetLimits[setting_name][1]
+            current_pos = (current_pos[0], current_pos[1]+gap)
+            show_variable(setting_name, value, min_value, max_value, current_pos)
+        
+        self.show_main_buttons()
+
+
 class Arcade(ShootingMode):
     def __init__(self, screen, game):
         super().__init__(screen, game)
@@ -421,8 +487,3 @@ class AWP(ShootingMode):
     def add_target(self):
         new_target = Target(self.screen, **SETTINGS.AWP.get_target_settings())
         self.targets.append(new_target)
-
-
-# TODO:
-# - check why there are multiple unknown buttons in summary
-# - clean up mess
