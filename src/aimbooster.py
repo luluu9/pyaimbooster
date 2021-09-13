@@ -82,6 +82,8 @@ class Game():
     def change_game_mode(self, game_mode):
         if game_mode == "Lobby":
             self.game_mode_obj = gamemodes.Lobby(screen, self)
+        elif game_mode == "Settings":
+            self.game_mode_obj = gamemodes.Settings(screen, self)
         elif game_mode == "Summary":
             self.game_mode_obj = gamemodes.Summary(screen, self)
         elif game_mode == "Arcade":
@@ -118,9 +120,6 @@ game = Game()
 # GAME EVENTS
 game.events["ADD_TARGET"] = USEREVENT + 1
 game.events["END_CHALLENGE"] = USEREVENT + 2
-
-# GAME MECHANICS
-game.TARGET_SPAWNRATE = 3 # targets per second 
 
 # MAINLOOP
 running = True

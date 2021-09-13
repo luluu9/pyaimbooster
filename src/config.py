@@ -1,14 +1,41 @@
-class AWPSettings():
-    def __init__(self):
-        self.target_settings = {"max_radius": 10, "grow": False, "outline_margin": 2}
+TargetLimits = {
+               "max_radius": [1, 100],
+               "grow": [0, 1],
+               "outline_margin": [0, 10],
+               "targets_amount": [1, 25],
+               "spawn_rate": [1, 10]
+               } 
 
-class ArcadeSettings():
-    def __init__(self):
-        self.target_settings = {"max_radius": 50, "grow": True, "outline_margin": 4}
+class TargetSettings():
+    def get_target_setting(self, attr_name):
+        try:
+            return getattr(self, attr_name)
+        except AttributeError:
+            return None
 
-class SpeedyFingersSettings():
+    def get_target_settings(self):
+        target_settings_names = ["max_radius", "grow", "outline_margin"]
+        target_settings = {name:self.get_target_setting(name) for name in target_settings_names if self.get_target_setting(name) != None}
+        return target_settings
+
+class AWPSettings(TargetSettings):
     def __init__(self):
-        self.target_settings = {"max_radius": 50, "grow": False, "outline_margin": 4}
+        self.max_radius = 10
+        self.grow = 0
+        self.outline_margin = 2
+
+class ArcadeSettings(TargetSettings):
+    def __init__(self):
+        self.max_radius = 50
+        self.grow = 1 # 1 == True
+        self.outline_margin = 4
+        self.spawn_rate = 3 # targets per second 
+
+class SpeedyFingersSettings(TargetSettings):
+    def __init__(self):
+        self.max_radius = 50
+        self.grow = 0
+        self.outline_margin = 4
         self.targets_amount = 5
 
 class Appearance():
@@ -33,6 +60,9 @@ class Appearance():
         self.tab_font_color = self.score_color
         self.tab_fontsize = 25
         self.buttons_padding = [15, 15]
+        self.settings_fontsize = 20
+        self.settings_buttons_fontsize = self.summary_fontsize
+        self.slider_fontsize = 15
 
 class AllSettings():
     def __init__(self):
@@ -44,6 +74,7 @@ class AllSettings():
         self.Arcade = ArcadeSettings()
         self.SpeedyFingers = SpeedyFingersSettings()
         self.Appearance = Appearance()
+        self.TargetLimits = TargetLimits
 
 
 SETTINGS = AllSettings()

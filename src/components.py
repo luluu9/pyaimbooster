@@ -228,4 +228,77 @@ class TabView(pygame.Rect):
         return empty_rect
 
 
-        
+class Slider(CallbackRect):
+    def __init__(self, screen, bg_color, font, text_color, font_size, line_color, min_value, max_value, current_value, gaps, line_width, button_inner_color, *args):
+        super().__init__(*args)
+        self.screen = screen
+        self.bg_color = bg_color
+        self.font = font
+        self.text_color = text_color
+        self.font_size = font_size
+        self.line_color = line_color
+        self.current_value = current_value
+        self.min_value = min_value
+        self.max_value = max_value
+        self.gaps = max(2, (max_value-min_value) if max_value-min_value < 5 else 5) 
+        self.gap = self.width/self.gaps
+        self.line_width = line_width
+        self.button_inner_color = button_inner_color
+        self.outline_color = line_color
+        self.outline_radius = line_width
+        self.set_callback(self.update_slider_position)
+
+    def set_call_on_change(self, call_on_change, *args, **kwargs):
+        self.call_on_change = call_on_change
+        self.call_on_change_args = args
+        self.call_on_change_kwargs = kwargs
+
+    def get_slider_position(self):
+        slider_position = self.x+self.width/(self.max_value-self.min_value)*self.current_value
+        return slider_position
+
+    def update_slider_position(self):
+        mouse_pos_x = pygame.mouse.get_pos()[0]
+        self.current_value = round((mouse_pos_x-self.x)*(self.max_value-self.min_value)/self.width)
+        self.call_on_change(self.current_value, *self.call_on_change_args, **self.call_on_change_kwargs)
+        self.clear()
+        self.draw()
+    
+    def clear(self):
+        rect_to_clear = self.inflate(self.font_size+self.outline_radius, self.font_size)
+        if self.min_text_rect:
+            rect_to_clear.union_ip(self.min_text_rect)
+        if self.max_text_rect:
+            rect_to_clear.union_ip(self.max_text_rect)
+        self.screen.fill(self.bg_color, rect_to_clear)
+    
+    def draw(self):
+        pygame.draw.line(self.screen, self.line_color, self.midleft, self.midright, self.line_width)
+        for i in range(1, self.gaps):
+            pos_x = self.x + i*self.gap
+            start_y = self.y
+            stop_y = self.y + self.height
+            pygame.draw.line(self.screen, self.line_color, (pos_x, start_y), (pos_x, stop_y), self.line_width)
+        self.draw_slider_button()
+        self.draw_text()
+
+    def draw_slider_button(self):
+        slider_position = self.get_slider_position()
+        button_rect = pygame.Rect(slider_position, self.centery, 0, 0).inflate(self.font_size, self.font_size*2)
+        pygame.draw.rect(self.screen, self.button_inner_color, button_rect)
+        pygame.draw.rect(self.screen, self.outline_color, button_rect, self.outline_radius)
+    
+    def draw_text(self):
+        min_text = str(self.min_value)
+        max_text = str(self.max_value)
+        text_y = self.centery+self.font_size*1.25
+        min_value_rect = self.font.get_rect(min_text, size=self.font_size) 
+        min_value_rect.topleft = (self.left, text_y)
+        self.min_text_rect = self.font.render_to(self.screen, min_value_rect, min_text, self.text_color)
+        max_value_rect = self.font.get_rect(max_text, size=self.font_size) 
+        max_value_rect.topright = (self.right, text_y)
+        self.max_text_rect = self.font.render_to(self.screen, max_value_rect, max_text, self.text_color)
+
+    def check_slider(self):
+        if pygame.mouse.get_pressed(num_buttons=3)[0] == True:
+            self.is_clicked(pygame.mouse.get_pos())
