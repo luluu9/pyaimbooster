@@ -1,6 +1,6 @@
 TargetLimits = {
                "max_radius": [1, 100],
-               "grow": [0, 1], # ???
+               "grow": [0, 1],
                "outline_margin": [0, 10],
                "targets_amount": [1, 25],
                "spawn_rate": [1, 10]

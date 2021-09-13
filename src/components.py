@@ -240,7 +240,7 @@ class Slider(CallbackRect):
         self.current_value = current_value
         self.min_value = min_value
         self.max_value = max_value
-        self.gaps = gaps
+        self.gaps = max(2, (max_value-min_value) if max_value-min_value < 5 else 5) 
         self.gap = self.width/self.gaps
         self.line_width = line_width
         self.button_inner_color = button_inner_color
