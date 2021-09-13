@@ -99,13 +99,15 @@ class Switch():
 # Graph data ((time_1, value_1), (time_2, value_2)...) in Rect
 # Indices are beyond rect
 class Graph(pygame.Rect):
-    def __init__(self, screen, color, font_size, data, *args) -> None:
+    def __init__(self, screen, color, font_size, data, *args, draw_text_on_x_axis=False, draw_text_on_y_axis=False) -> None:
         super().__init__(*args)
         self.screen = screen
         self.data = sorted(data, key=lambda x: x[0])
         self.color = color
         self.font_size = font_size
         self.font = pygame.freetype.Font(SETTINGS.Appearance.default_font, self.font_size)
+        self.draw_text_on_x_axis = draw_text_on_x_axis
+        self.draw_text_on_y_axis = draw_text_on_y_axis
     
     def draw(self):
         if len(self.data) < 2:
@@ -130,10 +132,11 @@ class Graph(pygame.Rect):
             # draw index line
             if y_pos != 0 and y_pos != self.height: # don't draw lines on edges
                 pygame.draw.line(self.screen, self.color, (self.x-axes_width, y_screen_pos), (self.x+axes_width, y_screen_pos), index_width)
-            # draw text value
-            text_rect = self.font.get_rect(str(y_value), size=self.font_size) 
-            text_rect.midright = (self.x-indice_margin, y_screen_pos)
-            self.font.render_to(self.screen, text_rect, str(y_value), self.color)
+            if self.draw_text_on_y_axis:
+                # draw text value
+                text_rect = self.font.get_rect(str(y_value), size=self.font_size) 
+                text_rect.midright = (self.x-indice_margin, y_screen_pos)
+                self.font.render_to(self.screen, text_rect, str(y_value), self.color)
         
         for i, x_pos in enumerate(range(0, self.width+1, int(x_delta))):
             x_value = self.data[i][0]
@@ -141,10 +144,11 @@ class Graph(pygame.Rect):
             # draw index line
             if x_pos != 0 and x_pos != self.height: # don't draw lines on edges
                 pygame.draw.line(self.screen, self.color, (x_screen_pos, self.y+self.width-axes_width), (x_screen_pos, self.y+self.width+axes_width), index_width)
-            # draw text value
-            text_rect = self.font.get_rect(str(x_value), size=self.font_size) 
-            text_rect.midtop = (x_screen_pos, self.y+self.height+indice_margin)
-            self.font.render_to(self.screen, text_rect, str(x_value), self.color)
+            if self.draw_text_on_x_axis:
+                # draw text value
+                text_rect = self.font.get_rect(str(x_value), size=self.font_size) 
+                text_rect.midtop = (x_screen_pos, self.y+self.height+indice_margin)
+                self.font.render_to(self.screen, text_rect, str(x_value), self.color)
 
         # get data to draw
         prepared_data = self.get_normalized_data()

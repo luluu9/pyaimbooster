@@ -261,7 +261,7 @@ class Summary(StaticButtons):
             self.previous_button.draw()
 
             # draw graph
-            graph = Graph(self.screen, SETTINGS.Appearance.summary_color, SETTINGS.Appearance.graph_fontsize, results_to_graph, (0, 0, 300, 300))
+            graph = Graph(self.screen, SETTINGS.Appearance.summary_color, SETTINGS.Appearance.graph_fontsize, results_to_graph, (0, 0, 300, 300), draw_text_on_y_axis=True)
             graph.center = self.tab_view.get_empty_rect().center
             graph.draw()
 
