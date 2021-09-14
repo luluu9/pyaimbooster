@@ -18,6 +18,37 @@ class TargetSettings():
         target_settings = {name:self.get_target_setting(name) for name in target_settings_names if self.get_target_setting(name) != None}
         return target_settings
 
+    def load_saved_settings(self):
+        import pathlib, json
+        settings_name_to_load = self.__class__.__name__
+        file_path = pathlib.Path.home() / "pyaimbooster.settings"
+        settings_to_load = {}
+        with file_path.open("r", encoding="utf-8") as settings:
+            for line in settings:
+                if line.startswith(settings_name_to_load):
+                    settings_to_load_str = line.split(maxsplit=1)[1]
+                    settings_to_load = json.loads(settings_to_load_str)
+                    break
+        for name, setting in settings_to_load.items():
+            if hasattr(self, name):
+                setattr(self, name, setting)
+
+    def save_settings(self):
+        import pathlib, json
+        settings_to_write = (json.dumps(self.__dict__))
+        settings_name_to_write = self.__class__.__name__
+        file_path = pathlib.Path.home() / "pyaimbooster.settings"
+        file_path.touch(exist_ok=True)
+        all_settings = {}
+        with file_path.open("r", encoding="utf-8") as old_settings:
+            for line in old_settings:
+                settings_name, settings = line.strip().split(maxsplit=1)
+                all_settings[settings_name] = settings
+        all_settings[settings_name_to_write] = settings_to_write
+        with file_path.open("w", encoding="utf-8") as new_settings:
+            for settings_name, settings in all_settings.items():
+                new_settings.write(settings_name + " " + settings_to_write + "\n")
+
 class AWPSettings(TargetSettings):
     def __init__(self):
         self.max_radius = 10
@@ -30,6 +61,7 @@ class ArcadeSettings(TargetSettings):
         self.grow = 1 # 1 == True
         self.outline_margin = 4
         self.spawn_rate = 3 # targets per second 
+        self.load_saved_settings()
 
 class SpeedyFingersSettings(TargetSettings):
     def __init__(self):
