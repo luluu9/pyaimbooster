@@ -54,6 +54,7 @@ class AWPSettings(TargetSettings):
         self.max_radius = 10
         self.grow = 0
         self.outline_margin = 2
+        self.load_saved_settings()
 
 class ArcadeSettings(TargetSettings):
     def __init__(self):
@@ -69,6 +70,7 @@ class SpeedyFingersSettings(TargetSettings):
         self.grow = 0
         self.outline_margin = 4
         self.targets_amount = 5
+        self.load_saved_settings()
 
 class Appearance():
     def __init__(self):

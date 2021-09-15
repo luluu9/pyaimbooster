@@ -364,12 +364,12 @@ class Settings(StaticButtons):
     def change_setting(self, value, setting_name):
         game_mode_settings = getattr(SETTINGS, self.tab_view.selected_tab)
         setattr(game_mode_settings, setting_name, value) # how to show updated value?
+        game_mode_settings.save_settings()
 
     def frame(self):
         super().frame()
         for slider in self.sliders:
             slider.check_slider()
-            #slider.draw_slider_button()
 
 
 class Arcade(ShootingMode):
