@@ -15,7 +15,7 @@ class TargetSettings():
             return None
 
     def get_target_settings(self):
-        target_settings_names = ["max_radius", "grow", "outline_margin"]
+        target_settings_names = ["max_radius", "grow", "outline_margin", "duration"]
         target_settings = {name:self.get_target_setting(name) for name in target_settings_names if self.get_target_setting(name) != None}
         return target_settings
 
