@@ -27,7 +27,6 @@ class Target():
         self.duration = duration
         self.grow = grow
         self.grow_step = max_radius/(duration*1000/2) # radius increase per milisecond
-        print(self.grow_step)
         self.outline_margin = outline_margin
         self.pos = self.get_allowed_pos()
         self.reached_max = False
@@ -513,3 +512,4 @@ class AWP(ShootingMode):
 # TO INSPECT:
 # - still something is bad about respawn in arcade mode
 # - sometimes challenge mode time is bad (ends too fast) probably due to exiting from challenge mode earlier
+# - target spawn rate can be accidentally set when entering Settings tab (mouse click is passed to newly created sliders)

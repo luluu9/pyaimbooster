@@ -3,7 +3,8 @@ TargetLimits = {
                "grow": [0, 1],
                "outline_margin": [0, 10],
                "targets_amount": [1, 25],
-               "spawn_rate": [1, 10]
+               "spawn_rate": [1, 10],
+               "duration": [1, 5]
                } 
 
 class TargetSettings():
@@ -62,6 +63,7 @@ class ArcadeSettings(TargetSettings):
         self.grow = 1 # 1 == True
         self.outline_margin = 4
         self.spawn_rate = 3 # targets per second 
+        self.duration = 2
         self.load_saved_settings()
 
 class SpeedyFingersSettings(TargetSettings):
