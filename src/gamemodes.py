@@ -19,25 +19,28 @@ from sounds import (hit_sound, miss_sound)
 
 
 class Target():
-    def __init__(self, screen, grow=0, max_radius=50, outline_margin=4, forbidden_rects=[]):
+    def __init__(self, screen, grow=0, max_radius=50, duration=1.0, outline_margin=4, forbidden_rects=[]):
         self.radius = 0
         self.screen = screen
         self.forbidden_rects = forbidden_rects
         self.max_radius = max_radius
+        self.duration = duration
         self.grow = grow
+        self.grow_step = max_radius/(duration*1000/2) # radius increase per milisecond
+        print(self.grow_step)
         self.outline_margin = outline_margin
         self.pos = self.get_allowed_pos()
         self.reached_max = False
         if not grow:
             self.radius = self.max_radius
     
-    def update(self):
+    def update(self, delta_time=0):
         if self.grow:
             if self.radius < self.max_radius and not self.reached_max:
-                self.radius += 1
+                self.radius += self.grow_step * delta_time
             else:
                 self.reached_max = True
-                self.radius -= 1
+                self.radius -= self.grow_step * delta_time
                 # destroy this object if smaller than 1px
                 if self.radius <= 0:
                     return False 
@@ -399,7 +402,7 @@ class Arcade(ShootingMode):
                 
         # update targets size and draw
         for target in self.targets:
-            if target.update() == False:
+            if target.update(self.game.clock.get_time()) == False:
                 self.targets_to_delete.append(target)
 
         # delete unused targets

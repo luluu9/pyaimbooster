@@ -77,6 +77,7 @@ class Game():
     def __init__(self):
         self.events = {}
         self.challenge = False
+        self.clock = pygame.time.Clock()
         self.change_game_mode("Lobby")
 
     def change_game_mode(self, game_mode):
@@ -112,7 +113,6 @@ class Game():
 # PYGAME INIT
 pygame.init()
 screen = pygame.display.set_mode((SETTINGS.SCREEN_WIDTH, SETTINGS.SCREEN_HEIGHT))
-clock = pygame.time.Clock()
 
 # LOAD GAME
 game = Game()
@@ -124,7 +124,7 @@ game.events["END_CHALLENGE"] = USEREVENT + 2
 # MAINLOOP
 running = True
 while running:
-    pygame.display.set_caption("FPS: " + str(int(clock.get_fps())))
+    pygame.display.set_caption("FPS: " + str(int(game.clock.get_fps())))
     for event in pygame.event.get((QUIT, KEYDOWN, game.events["END_CHALLENGE"])):
         if event.type == QUIT:
             running = False
@@ -149,7 +149,8 @@ while running:
     game.frame()
     # refresh display
     pygame.display.update()
-    clock.tick(SETTINGS.FPS)
+    game.clock.tick(SETTINGS.FPS)
+
 pygame.quit()
 
 
