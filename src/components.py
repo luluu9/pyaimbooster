@@ -248,14 +248,19 @@ class Slider(CallbackRect):
         self.gap = self.width/self.gaps
         self.line_width = line_width
         self.button_inner_color = button_inner_color
+        self.button = None
         self.outline_color = line_color
         self.outline_radius = line_width
+        self.focused = False
         self.set_callback(self.update_slider_position)
 
     def set_call_on_change(self, call_on_change, *args, **kwargs):
         self.call_on_change = call_on_change
         self.call_on_change_args = args
         self.call_on_change_kwargs = kwargs
+
+    def set_focus(self):
+        self.focused = True
 
     def get_slider_position(self):
         slider_position = self.x+self.width/(self.max_value-self.min_value)*(self.current_value-self.min_value)
@@ -285,6 +290,8 @@ class Slider(CallbackRect):
             pygame.draw.line(self.screen, self.line_color, (pos_x, start_y), (pos_x, stop_y), self.line_width)
         self.draw_slider_button()
         self.draw_text()
+        self.button = CallbackRect(self) # to check if focused
+        self.button.set_callback(self.set_focus)
 
     def draw_slider_button(self):
         slider_position = self.get_slider_position()
@@ -302,7 +309,9 @@ class Slider(CallbackRect):
         max_value_rect = self.font.get_rect(max_text, size=self.font_size) 
         max_value_rect.topright = (self.right, text_y)
         self.max_text_rect = self.font.render_to(self.screen, max_value_rect, max_text, self.text_color)
-
+        
     def check_slider(self):
-        if pygame.mouse.get_pressed(num_buttons=3)[0] == True:
-            self.is_clicked(pygame.mouse.get_pos())
+        if self.focused:
+            if pygame.mouse.get_pressed(num_buttons=3)[0] == True:
+                if self.is_clicked(pygame.mouse.get_pos()) == False:
+                    self.focused = False

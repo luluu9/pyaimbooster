@@ -88,7 +88,7 @@ class Target():
 
 class StaticButtons():
     def frame(self):
-        for event in pygame.event.get():
+        for event in pygame.event.get(): # add type of event to get
             if event.type == pygame.MOUSEBUTTONDOWN:
                 for button in self.buttons:
                     if button.is_clicked(pygame.mouse.get_pos()):
@@ -349,6 +349,7 @@ class Settings(StaticButtons):
             slider.center = (pos[0], pos[1]+self.font_size*1.5)
             slider.set_call_on_change(self.change_setting, setting_name)
             slider.draw()
+            self.buttons.append(slider.button)
             self.sliders.append(slider)
 
         gap = self.font_size * 4
@@ -360,7 +361,6 @@ class Settings(StaticButtons):
             max_value = SETTINGS.TargetLimits[setting_name][1]
             current_pos = (current_pos[0], current_pos[1]+gap)
             show_variable(setting_name, value, min_value, max_value, current_pos)
-        
         self.show_main_buttons()
     
     def change_setting(self, value, setting_name):
@@ -511,5 +511,5 @@ class AWP(ShootingMode):
 
 # TO INSPECT:
 # - still something is bad about respawn in arcade mode
-# - sometimes challenge mode time is bad (ends too fast) probably due to exiting from challenge mode earlier
+# - sometimes challenge mode time is bad (ends too fast) probably due to exiting from challenge mode earlier (resetting timer doesnt work)
 # - target spawn rate can be accidentally set when entering Settings tab (mouse click is passed to newly created sliders)

@@ -105,7 +105,7 @@ class AllSettings():
         self.SCREEN_WIDTH = 800
         self.SCREEN_HEIGHT = 600
         self.FPS = 144
-        self.CHALLENGE_TIME = 30*1000 # 30 seconds
+        self.CHALLENGE_TIME = 10*1000 # 30 seconds
         self.AWP = AWPSettings()
         self.Arcade = ArcadeSettings()
         self.SpeedyFingers = SpeedyFingersSettings()

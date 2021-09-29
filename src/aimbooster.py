@@ -103,7 +103,7 @@ class Game():
     
     def reset(self):
         for event in self.events.values():
-            pygame.time.set_timer(event, 0)
+            pygame.time.set_timer(event, 0) # doesnt work?
         self.scoreCounter = ScoreCounter()
     
     def frame(self):
