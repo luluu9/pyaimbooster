@@ -99,7 +99,7 @@ class ShootingMode():
     def __init__(self, screen, game):
         game.reset() # reset events and scoreboard
         if game.challenge == True:
-            pygame.time.set_timer(game.events["END_CHALLENGE"], SETTINGS.CHALLENGE_TIME, True)
+            pygame.time.set_timer(game.events["END_CHALLENGE"], SETTINGS.CHALLENGE_TIME, once=True)
         self.screen = screen
         self.game = game
         self.scoreCounter = game.scoreCounter
@@ -512,4 +512,3 @@ class AWP(ShootingMode):
 # TO INSPECT:
 # - still something is bad about respawn in arcade mode
 # - sometimes challenge mode time is bad (ends too fast) probably due to exiting from challenge mode earlier (resetting timer doesnt work)
-# - target spawn rate can be accidentally set when entering Settings tab (mouse click is passed to newly created sliders)
